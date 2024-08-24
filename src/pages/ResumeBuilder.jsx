@@ -63,43 +63,44 @@ const ResumeBuilder = () => {
     if (sectionToRemove) {
       setAvailableAdditionalSections([...availableAdditionalSections, sectionToRemove]);
       setActiveSections(activeSections.filter(section => section.id !== sectionId));
-      if (selectedSection === sectionId) {
-        setSelectedSection('personal-details');
-      }
+
+      const remainingSections = [...sections, ...activeSections.map(s => s.id).filter(id => id !== sectionId)];
+      setSelectedSection(remainingSections[remainingSections.length - 1]);
     }
   };
 
   const renderForm = () => {
     const currentIndex = [...sections, ...activeSections.map(s => s.id)].indexOf(selectedSection);
     const isLastSection = currentIndex === [...sections, ...activeSections.map(s => s.id)].length - 1;
+    const isFirstSection = currentIndex === 0;
 
     switch (selectedSection) {
       case 'personal-details':
-        return <PersonalDetailsForm onNext={handleNext} />;
+        return <PersonalDetailsForm onNext={!isLastSection && handleNext} />;
       case 'contact-information':
-        return <ContactInformationForm onNext={handleNext} onPrevious={handlePrevious} />;
+        return <ContactInformationForm onNext={!isLastSection && handleNext} onPrevious={!isFirstSection && handlePrevious} />;
       case 'employment-history':
-        return <EmploymentHistoryForm onNext={handleNext} onPrevious={handlePrevious} />;
+        return <EmploymentHistoryForm onNext={!isLastSection && handleNext} onPrevious={!isFirstSection && handlePrevious} />;
       case 'skills':
-        return <SkillsForm onNext={handleNext} onPrevious={handlePrevious} />;
+        return <SkillsForm onNext={!isLastSection && handleNext} onPrevious={!isFirstSection && handlePrevious} />;
       case 'education':
-        return <EducationForm onNext={handleNext} onPrevious={handlePrevious} />;
+        return <EducationForm onNext={!isLastSection && handleNext} onPrevious={!isFirstSection && handlePrevious} />;
       case 'internships':
-        return <InternshipForm onNext={!isLastSection && handleNext} onPrevious={handlePrevious} />;
+        return <InternshipForm onNext={!isLastSection && handleNext} onPrevious={!isFirstSection && handlePrevious} />;
       case 'courses':
-        return <CoursesForm onNext={!isLastSection && handleNext} onPrevious={handlePrevious} />;
+        return <CoursesForm onNext={!isLastSection && handleNext} onPrevious={!isFirstSection && handlePrevious} />;
       case 'projects':
-        return <ProjectsForm onNext={!isLastSection && handleNext} onPrevious={handlePrevious} />;
+        return <ProjectsForm onNext={!isLastSection && handleNext} onPrevious={!isFirstSection && handlePrevious} />;
       case 'references':
-        return <ReferencesForm onNext={!isLastSection && handleNext} onPrevious={handlePrevious} />;
+        return <ReferencesForm onNext={!isLastSection && handleNext} onPrevious={!isFirstSection && handlePrevious} />;
       case 'website-links':
-        return <WebsiteLinksForm onNext={!isLastSection && handleNext} onPrevious={handlePrevious} />;
+        return <WebsiteLinksForm onNext={!isLastSection && handleNext} onPrevious={!isFirstSection && handlePrevious} />;
       case 'additional-section':
         return (
           <AdditionalSectionSelection
             availableSections={availableAdditionalSections}
             onAddSection={handleAddSection}
-            onBack={handlePrevious}
+            onBack={!isFirstSection && handlePrevious}
           />
         );
       default:

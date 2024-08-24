@@ -1,31 +1,24 @@
 import { useState, useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import DatePicker from 'react-datepicker';
-import "react-datepicker/dist/react-datepicker.css";
-import { addEducation, removeEducation, updateEducation } from '../../redux/slices/resumeSlice';
-import { validateEndDate } from '../../utils/dateValidation';
-import { format } from 'date-fns';
+import { addEducation, updateEducation, removeEducation } from '../../redux/slices/resumeSlice';
+import DateRangeInput from '../common/DateRangeInput';
 
-const EducationForm = ({ onNext, onPrevious }) => {
+const EducationForm = ({ onNext, onPrevious, isLastForm }) => {
   const dispatch = useDispatch();
   const education = useSelector((state) => state.resume.education);
 
   const [expandedIndex, setExpandedIndex] = useState(null);
-  const [dateError, setDateError] = useState(false);
 
   useEffect(() => {
-    setExpandedIndex(null);
+    setExpandedIndex(null); // Collapse all sections when the form is loaded or refreshed
   }, []);
 
-  const handleDateChange = (date, index, field) => {
-    const formattedDate = date ? format(date, 'MMM yyyy') : '';
-    const updatedEducation = { ...education[index], [field]: formattedDate };
-
-    if (field === 'startDate' || field === 'endDate') {
-      const isValid = validateEndDate(updatedEducation.startDate, updatedEducation.endDate);
-      setDateError(!isValid);
-    }
-
+  const handleDateChange = (value, field, index) => {
+    const updatedEducation = {
+      ...education[index],
+      [field]: value,
+      currentlyStudying: value === 'Present',
+    };
     dispatch(updateEducation({ index, ...updatedEducation }));
   };
 
@@ -49,6 +42,7 @@ const EducationForm = ({ onNext, onPrevious }) => {
       startDate: '',
       endDate: '',
       location: '',
+      currentlyStudying: false,
     }));
     setExpandedIndex(education.length);
   };
@@ -68,7 +62,7 @@ const EducationForm = ({ onNext, onPrevious }) => {
             onClick={() => toggleExpandCollapse(index)}
           >
             <div>
-              <strong className="text-lg">{edu.degree || "Untitled"}</strong> at {edu.institute || ""}
+              <strong className="text-lg">{edu.degree || "Untitled Degree"}</strong> at {edu.institute || ""}
             </div>
             <div className="flex items-center">
               <button
@@ -97,7 +91,7 @@ const EducationForm = ({ onNext, onPrevious }) => {
                     id="institute"
                     name="institute"
                     value={edu.institute}
-                    placeholder="Enter your institute"
+                    placeholder="Enter the institute name"
                     onChange={(e) => handleChange(e, index)}
                     className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
                   />
@@ -114,31 +108,12 @@ const EducationForm = ({ onNext, onPrevious }) => {
                     className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
                   />
                 </div>
-                <div className="mb-4">
-                  <label htmlFor="startDate" className="block text-sm font-medium text-gray-700">Start Date</label>
-                  <DatePicker
-                    selected={edu.startDate ? new Date(edu.startDate) : null}
-                    onChange={(date) => handleDateChange(date, index, 'startDate')}
-                    dateFormat="MMM yyyy"
-                    showMonthYearPicker
-                    placeholderText="Select Start Date"
-                    className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
-                  />
-                </div>
-                <div className="mb-4">
-                  <label htmlFor="endDate" className="block text-sm font-medium text-gray-700">End Date</label>
-                  <DatePicker
-                    selected={edu.endDate ? new Date(edu.endDate) : null}
-                    onChange={(date) => handleDateChange(date, index, 'endDate')}
-                    dateFormat="MMM yyyy"
-                    showMonthYearPicker
-                    placeholderText="Select End Date"
-                    className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
-                  />
-                  {dateError && (
-                    <p className="text-red-500 text-sm mt-2">End date cannot be before start date.</p>
-                  )}
-                </div>
+                <DateRangeInput
+                  startDate={edu.startDate}
+                  endDate={edu.endDate}
+                  currentlyWorking={edu.currentlyStudying}
+                  onDateChange={(value, field) => handleDateChange(value, field, index)}
+                />
                 <div className="mb-4">
                   <label htmlFor="location" className="block text-sm font-medium text-gray-700">Location</label>
                   <input
@@ -158,12 +133,11 @@ const EducationForm = ({ onNext, onPrevious }) => {
       ))}
 
       <button onClick={handleAddMoreClick} className="bg-green-500 text-white py-2 px-4 rounded-md mt-4">
-        Add More Education
+        Add Record
       </button>
-
       <div className="flex justify-between mt-4">
-        <button onClick={onPrevious} className="bg-gray-500 text-white py-2 px-4 rounded-md">Previous</button>
-        <button onClick={onNext} className="bg-blue-500 text-white py-2 px-4 rounded-md">Next</button>
+        <button onClick={onPrevious} className="btn btn-secondary">Previous</button>
+        {!isLastForm && <button onClick={onNext} className="btn btn-primary">Next</button>}
       </div>
     </div>
   );

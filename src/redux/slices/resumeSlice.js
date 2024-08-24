@@ -39,11 +39,19 @@ const resumeSlice = createSlice({
     addEmploymentHistory(state, action) {
       state.employmentHistory.push(action.payload);
     },
+    updateEmploymentHistory(state, action) {
+      const { index, ...updatedEmployment } = action.payload;
+      state.employmentHistory[index] = updatedEmployment;
+    },
     removeEmploymentHistory(state, action) {
       state.employmentHistory.splice(action.payload, 1);
     },
     addSkill(state, action) {
       state.skills.push(action.payload);
+    },
+    updateSkill(state, action) {
+      const { index, ...updatedSkill } = action.payload;
+      state.skills[index] = updatedSkill;
     },
     removeSkill(state, action) {
       state.skills.splice(action.payload, 1);
@@ -52,8 +60,8 @@ const resumeSlice = createSlice({
       state.education.push(action.payload);
     },
     updateEducation(state, action) {
-      const { index, ...educationDetails } = action.payload;
-      state.education[index] = educationDetails;
+      const { index, ...updatedEducation } = action.payload;
+      state.education[index] = updatedEducation;
     },
     removeEducation(state, action) {
       state.education.splice(action.payload, 1);
@@ -62,8 +70,8 @@ const resumeSlice = createSlice({
       state.additionalSections.internships.push(action.payload);
     },
     updateInternship(state, action) {
-      const { index, ...internshipDetails } = action.payload;
-      state.additionalSections.internships[index] = internshipDetails;
+      const { index, ...updatedInternship } = action.payload;
+      state.additionalSections.internships[index] = updatedInternship;
     },
     removeInternship(state, action) {
       state.additionalSections.internships.splice(action.payload, 1);
@@ -72,8 +80,8 @@ const resumeSlice = createSlice({
       state.additionalSections.courses.push(action.payload);
     },
     updateCourse(state, action) {
-      const { index, ...courseDetails } = action.payload;
-      state.additionalSections.courses[index] = courseDetails;
+      const { index, ...updatedCourse } = action.payload;
+      state.additionalSections.courses[index] = updatedCourse;
     },
     removeCourse(state, action) {
       state.additionalSections.courses.splice(action.payload, 1);
@@ -82,8 +90,8 @@ const resumeSlice = createSlice({
       state.additionalSections.projects.push(action.payload);
     },
     updateProject(state, action) {
-      const { index, ...projectDetails } = action.payload;
-      state.additionalSections.projects[index] = projectDetails;
+      const { index, ...updatedProject } = action.payload;
+      state.additionalSections.projects[index] = updatedProject;
     },
     removeProject(state, action) {
       state.additionalSections.projects.splice(action.payload, 1);
@@ -92,8 +100,8 @@ const resumeSlice = createSlice({
       state.additionalSections.references.push(action.payload);
     },
     updateReference(state, action) {
-      const { index, ...referenceDetails } = action.payload;
-      state.additionalSections.references[index] = referenceDetails;
+      const { index, ...updatedReference } = action.payload;
+      state.additionalSections.references[index] = updatedReference;
     },
     removeReference(state, action) {
       state.additionalSections.references.splice(action.payload, 1);
@@ -102,8 +110,8 @@ const resumeSlice = createSlice({
       state.additionalSections.websiteLinks.push(action.payload);
     },
     updateWebsiteLink(state, action) {
-      const { index, ...linkDetails } = action.payload;
-      state.additionalSections.websiteLinks[index] = linkDetails;
+      const { index, ...updatedLink } = action.payload;
+      state.additionalSections.websiteLinks[index] = updatedLink;
     },
     removeWebsiteLink(state, action) {
       state.additionalSections.websiteLinks.splice(action.payload, 1);
@@ -115,8 +123,10 @@ export const {
   setPersonalDetails,
   setContactInformation,
   addEmploymentHistory,
+  updateEmploymentHistory,
   removeEmploymentHistory,
   addSkill,
+  updateSkill,
   removeSkill,
   addEducation,
   updateEducation,

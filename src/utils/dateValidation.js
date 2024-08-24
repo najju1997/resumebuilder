@@ -1,17 +1,33 @@
-import { isAfter, parse } from 'date-fns';
+// src/utils/dateValidation.js
+
+import { isBefore, parse } from 'date-fns';
 
 /**
- * Validates if the end date is not before the start date.
- * 
+ * Validates that the end date is not before the start date.
  * @param {string} startDate - The start date in 'MMM yyyy' format.
  * @param {string} endDate - The end date in 'MMM yyyy' format.
- * @returns {boolean} - Returns true if endDate is valid, false otherwise.
+ * @returns {boolean} - True if the end date is valid, false otherwise.
  */
 export const validateEndDate = (startDate, endDate) => {
-  if (!startDate || !endDate) return true; // No validation needed if one of the dates is missing
+  if (!startDate || !endDate || endDate === 'Present') return true;
+  
+  const start = parse(startDate, 'MMM yyyy', new Date());
+  const end = parse(endDate, 'MMM yyyy', new Date());
+
+  return !isBefore(end, start);
+};
+
+/**
+ * Validates that the start date is not after the end date.
+ * @param {string} startDate - The start date in 'MMM yyyy' format.
+ * @param {string} endDate - The end date in 'MMM yyyy' format.
+ * @returns {boolean} - True if the start date is valid, false otherwise.
+ */
+export const validateStartDate = (startDate, endDate) => {
+  if (!startDate || !endDate || endDate === 'Present') return true;
 
   const start = parse(startDate, 'MMM yyyy', new Date());
   const end = parse(endDate, 'MMM yyyy', new Date());
 
-  return isAfter(end, start) || start.getTime() === end.getTime(); // Valid if end date is after or equal to start date
+  return !isBefore(end, start);
 };
