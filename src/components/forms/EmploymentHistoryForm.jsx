@@ -147,8 +147,8 @@ const EmploymentHistoryForm = ({ onNext, onPrevious, isLastForm }) => {
         Add Record
       </button>
       <div className="flex justify-between mt-4">
-        <button onClick={onPrevious} className="btn btn-secondary">Previous</button>
-        {!isLastForm && <button onClick={onNext} className="btn btn-primary">Next</button>}
+        <button onClick={onPrevious} className="bg-gray-500 text-white py-2 px-4 rounded-md">Previous</button>
+        {onNext && <button onClick={onNext} className="bg-blue-500 text-white py-2 px-4 rounded-md">Next</button>}
       </div>
     </div>
   );

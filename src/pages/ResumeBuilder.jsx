@@ -76,7 +76,7 @@ const ResumeBuilder = () => {
 
     switch (selectedSection) {
       case 'personal-details':
-        return <PersonalDetailsForm onNext={!isLastSection && handleNext} />;
+        return <PersonalDetailsForm onNext={handleNext} />;
       case 'contact-information':
         return <ContactInformationForm onNext={!isLastSection && handleNext} onPrevious={!isFirstSection && handlePrevious} />;
       case 'employment-history':
@@ -100,7 +100,7 @@ const ResumeBuilder = () => {
           <AdditionalSectionSelection
             availableSections={availableAdditionalSections}
             onAddSection={handleAddSection}
-            onBack={!isFirstSection && handlePrevious}
+            onBack={handlePrevious}
           />
         );
       default:

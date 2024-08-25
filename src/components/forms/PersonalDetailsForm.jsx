@@ -64,8 +64,8 @@ const PersonalDetailsForm = ({ onNext, onPrevious }) => {
           </div>
         </div>
         <div className="flex justify-between mt-6">
-          <button onClick={onPrevious} className="bg-gray-500 text-white py-2 px-4 rounded-md">Previous</button>
-          <button onClick={onNext} className="bg-blue-500 text-white py-2 px-4 rounded-md">Next</button>
+          {onPrevious && <button onClick={onPrevious} className="bg-gray-500 text-white py-2 px-4 rounded-md">Previous</button>}
+          {onNext && <button onClick={onNext} className="bg-blue-500 text-white py-2 px-4 rounded-md">Next</button>}
         </div>
       </form>
     </div>

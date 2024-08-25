@@ -97,8 +97,8 @@ const ReferencesForm = ({ onNext, onPrevious }) => {
         </ul>
       </div>
       <div className="flex justify-between mt-6">
-        <button onClick={onPrevious} className="btn btn-secondary">Previous</button>
-        {onNext && <button onClick={onNext} className="btn btn-primary">Next</button>}
+        <button onClick={onPrevious} className="bg-gray-500 text-white py-2 px-4 rounded-md">Previous</button>
+        {onNext && <button onClick={onNext} className="bg-blue-500 text-white py-2 px-4 rounded-md">Next</button>}
       </div>
     </div>
   );
