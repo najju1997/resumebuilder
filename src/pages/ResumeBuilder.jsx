@@ -11,7 +11,6 @@ import ReferencesForm from '../components/forms/additionalSections/ReferencesFor
 import WebsiteLinksForm from '../components/forms/additionalSections/WebsiteLinksForm';
 import AdditionalSectionSelection from '../components/forms/AdditionalSectionSelection';
 import ResumePreview from '../components/ResumePreview';
-import ProgressBar from '../components/common/ProgressBar';
 import Sidebar from '../components/common/Sidebar';
 
 const sections = [
@@ -34,6 +33,8 @@ const ResumeBuilder = () => {
   const [selectedSection, setSelectedSection] = useState('personal-details');
   const [activeSections, setActiveSections] = useState([]);
   const [availableAdditionalSections, setAvailableAdditionalSections] = useState(allAdditionalSections);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [isPreviewOpen, setIsPreviewOpen] = useState(false);
 
   const handleNext = () => {
     const currentIndex = [...sections, ...activeSections.map(s => s.id)].indexOf(selectedSection);
@@ -63,38 +64,37 @@ const ResumeBuilder = () => {
     if (sectionToRemove) {
       setAvailableAdditionalSections([...availableAdditionalSections, sectionToRemove]);
       setActiveSections(activeSections.filter(section => section.id !== sectionId));
-
-      const remainingSections = [...sections, ...activeSections.map(s => s.id).filter(id => id !== sectionId)];
-      setSelectedSection(remainingSections[remainingSections.length - 1]);
+      if (selectedSection === sectionId) {
+        setSelectedSection('personal-details');
+      }
     }
   };
 
   const renderForm = () => {
     const currentIndex = [...sections, ...activeSections.map(s => s.id)].indexOf(selectedSection);
     const isLastSection = currentIndex === [...sections, ...activeSections.map(s => s.id)].length - 1;
-    const isFirstSection = currentIndex === 0;
 
     switch (selectedSection) {
       case 'personal-details':
         return <PersonalDetailsForm onNext={handleNext} />;
       case 'contact-information':
-        return <ContactInformationForm onNext={!isLastSection && handleNext} onPrevious={!isFirstSection && handlePrevious} />;
+        return <ContactInformationForm onNext={!isLastSection && handleNext} onPrevious={handlePrevious} />;
       case 'employment-history':
-        return <EmploymentHistoryForm onNext={!isLastSection && handleNext} onPrevious={!isFirstSection && handlePrevious} />;
+        return <EmploymentHistoryForm onNext={!isLastSection && handleNext} onPrevious={handlePrevious} />;
       case 'skills':
-        return <SkillsForm onNext={!isLastSection && handleNext} onPrevious={!isFirstSection && handlePrevious} />;
+        return <SkillsForm onNext={!isLastSection && handleNext} onPrevious={handlePrevious} />;
       case 'education':
-        return <EducationForm onNext={!isLastSection && handleNext} onPrevious={!isFirstSection && handlePrevious} />;
+        return <EducationForm onNext={!isLastSection && handleNext} onPrevious={handlePrevious} />;
       case 'internships':
-        return <InternshipForm onNext={!isLastSection && handleNext} onPrevious={!isFirstSection && handlePrevious} />;
+        return <InternshipForm onNext={!isLastSection && handleNext} onPrevious={handlePrevious} />;
       case 'courses':
-        return <CoursesForm onNext={!isLastSection && handleNext} onPrevious={!isFirstSection && handlePrevious} />;
+        return <CoursesForm onNext={!isLastSection && handleNext} onPrevious={handlePrevious} />;
       case 'projects':
-        return <ProjectsForm onNext={!isLastSection && handleNext} onPrevious={!isFirstSection && handlePrevious} />;
+        return <ProjectsForm onNext={!isLastSection && handleNext} onPrevious={handlePrevious} />;
       case 'references':
-        return <ReferencesForm onNext={!isLastSection && handleNext} onPrevious={!isFirstSection && handlePrevious} />;
+        return <ReferencesForm onNext={!isLastSection && handleNext} onPrevious={handlePrevious} />;
       case 'website-links':
-        return <WebsiteLinksForm onNext={!isLastSection && handleNext} onPrevious={!isFirstSection && handlePrevious} />;
+        return <WebsiteLinksForm onNext={!isLastSection && handleNext} onPrevious={handlePrevious} />;
       case 'additional-section':
         return (
           <AdditionalSectionSelection
@@ -109,20 +109,57 @@ const ResumeBuilder = () => {
   };
 
   return (
-    <div className="resume-builder flex">
-      <Sidebar
-        onSelectSection={setSelectedSection}
-        activeSections={activeSections}
-        onDeleteSection={handleDeleteSection}
-      />
-      <div className="form-container w-2/3 p-4">
+    <div className="flex flex-col md:flex-row h-screen overflow-hidden">
+      {/* Mobile Header */}
+      <div className="md:hidden w-full flex justify-between p-4 bg-gray-200">
+        <button onClick={() => setIsSidebarOpen(!isSidebarOpen)} className="text-xl">
+          ☰
+        </button>
+        <button onClick={() => setIsPreviewOpen(!isPreviewOpen)} className="text-xl">
+          Preview
+        </button>
+      </div>
+
+      {/* Sidebar */}
+      <div
+        className={`fixed md:relative bg-gray-200 h-full z-20 transform ${
+          isSidebarOpen ? 'translate-x-0' : '-translate-x-full'
+        } md:translate-x-0 transition-transform duration-200 ease-in-out w-1/5`}
+      >
+        <button
+          className="md:hidden absolute top-4 right-4 text-xl"
+          onClick={() => setIsSidebarOpen(false)}
+        >
+          ✕
+        </button>
+        <Sidebar
+          onSelectSection={setSelectedSection}
+          activeSections={activeSections}
+          onDeleteSection={handleDeleteSection}
+        />
+      </div>
+
+      {/* Form Section */}
+      <div className="w-full md:w-2/5 p-6 h-full overflow-y-auto">
         <h1 className="text-3xl font-bold mb-6">Build Your Resume</h1>
-        <ProgressBar />
         {renderForm()}
       </div>
-      <div className="preview-container w-1/3 p-4 bg-gray-100">
-        <h2 className="text-2xl font-semibold mb-4">Resume Preview</h2>
-        <ResumePreview />
+
+      {/* Preview Section */}
+      <div
+        className={`fixed md:relative z-20 transform ${
+          isPreviewOpen ? 'translate-x-0' : 'translate-x-full'
+        } md:translate-x-0 transition-transform duration-200 ease-in-out bg-gray-100 h-full w-full md:w-2/5 flex justify-center items-start`}
+      >
+        <button
+          className="md:hidden absolute top-4 right-4 text-xl"
+          onClick={() => setIsPreviewOpen(false)}
+        >
+          ✕
+        </button>
+        <div className="bg-white shadow-md w-full max-w-[210mm] h-full max-h-[297mm] p-8">
+          <ResumePreview />
+        </div>
       </div>
     </div>
   );

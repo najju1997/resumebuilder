@@ -1,99 +1,149 @@
-
 import { useSelector } from 'react-redux';
 
 const ResumePreview = () => {
-  const {
-    personalDetails,
-    contactInformation,
-    employmentHistory,
-    skills,
-    education,
-    additionalSections,
-  } = useSelector((state) => state.resume);
+  const personalDetails = useSelector((state) => state.resume.personalDetails);
+  const contactInformation = useSelector((state) => state.resume.contactInformation);
+  const employmentHistory = useSelector((state) => state.resume.employmentHistory);
+  const skills = useSelector((state) => state.resume.skills);
+  const education = useSelector((state) => state.resume.education);
+  const internships = useSelector((state) => state.resume.additionalSections.internships);
+  const courses = useSelector((state) => state.resume.additionalSections.courses);
+  const projects = useSelector((state) => state.resume.additionalSections.projects);
+  const references = useSelector((state) => state.resume.additionalSections.references);
+  const websiteLinks = useSelector((state) => state.resume.additionalSections.websiteLinks);
 
   return (
-    <div className="resume-preview">
-      <h2>{personalDetails.firstName} {personalDetails.lastName}</h2>
-      {personalDetails.profilePhoto && (
-        <img src={URL.createObjectURL(personalDetails.profilePhoto)} alt="Profile" />
+    <div className="p-6 bg-white shadow-lg rounded-md">
+      {/* Personal Details */}
+      <div className="text-center">
+        <h1 className="text-4xl font-bold">{`${personalDetails.firstName} ${personalDetails.lastName}`}</h1>
+        <p className="text-sm">{contactInformation.address}</p>
+        <p className="text-sm">{`${contactInformation.city}, ${contactInformation.country} - ${contactInformation.postalCode}`}</p>
+        <p className="text-sm">{contactInformation.email}</p>
+        <p className="text-sm">{contactInformation.phone}</p>
+      </div>
+      <hr className="my-4 border-gray-300" />
+
+      {/* Employment History */}
+      {employmentHistory.length > 0 && (
+        <div className="mb-4">
+          <h2 className="text-2xl font-semibold">Employment History</h2>
+          {employmentHistory.map((job, index) => (
+            <div key={index} className="mt-4">
+              <h3 className="text-lg font-semibold">{job.jobTitle}</h3>
+              <p className="text-sm italic">{job.company} | {job.location}</p>
+              <p className="text-sm">{job.startDate} - {job.endDate}</p>
+              {job.experiencePoints && (
+              <ul className="list-disc list-inside">
+                {job.experiencePoints.split('\n').map((point, idx) => (
+                  <li key={idx} className="text-sm">{point}</li>
+                ))}
+              </ul>
+            )}
+
+            </div>
+          ))}
+        </div>
       )}
-      
-      <h3>Contact Information</h3>
-      <p>{contactInformation.email}</p>
-      <p>{contactInformation.phone}</p>
-      <p>{contactInformation.address}, {contactInformation.city}, {contactInformation.country} - {contactInformation.postalCode}</p>
 
-      <h3>Employment History</h3>
-      <ul>
-        {employmentHistory.map((job, index) => (
-          <li key={index}>
-            <strong>{job.jobTitle}</strong> at {job.company} ({job.startDate} - {job.endDate})
-            <p>{job.experiencePoints}</p>
-          </li>
-        ))}
-      </ul>
+      {/* Skills */}
+      {skills.length > 0 && (
+        <div className="mb-4">
+          <h2 className="text-2xl font-semibold">Skills</h2>
+          <ul className="list-disc list-inside">
+            {skills.map((skill, index) => (
+              <li key={index} className="text-sm">{skill.skill} ({skill.level} out of 5)</li>
+            ))}
+          </ul>
+        </div>
+      )}
 
-      <h3>Skills</h3>
-      <ul>
-        {skills.map((skill, index) => (
-          <li key={index}>{skill.skill} - {skill.level} out of 5</li>
-        ))}
-      </ul>
+      {/* Education */}
+      {education.length > 0 && (
+        <div className="mb-4">
+          <h2 className="text-2xl font-semibold">Education</h2>
+          {education.map((edu, index) => (
+            <div key={index} className="mt-4">
+              <h3 className="text-lg font-semibold">{edu.degree}</h3>
+              <p className="text-sm italic">{edu.institute} | {edu.location}</p>
+              <p className="text-sm">{edu.startDate} - {edu.endDate}</p>
+            </div>
+          ))}
+        </div>
+      )}
 
-      <h3>Education</h3>
-      <ul>
-        {education.map((edu, index) => (
-          <li key={index}>
-            <strong>{edu.degree}</strong> from {edu.institute} ({edu.startDate} - {edu.endDate}) - {edu.location}
-          </li>
-        ))}
-      </ul>
+      {/* Internships */}
+      {internships.length > 0 && (
+        <div className="mb-4">
+          <h2 className="text-2xl font-semibold">Internships</h2>
+          {internships.map((internship, index) => (
+            <div key={index} className="mt-4">
+              <h3 className="text-lg font-semibold">{internship.jobTitle}</h3>
+              <p className="text-sm italic">{internship.company} | {internship.location}</p>
+              <p className="text-sm">{internship.startDate} - {internship.endDate}</p>
+            </div>
+          ))}
+        </div>
+      )}
 
-      <h3>Internships</h3>
-      <ul>
-        {additionalSections.internships.map((internship, index) => (
-          <li key={index}>
-            <strong>{internship.jobTitle}</strong> at {internship.company} ({internship.startDate} - {internship.endDate}) - {internship.location}
-          </li>
-        ))}
-      </ul>
+      {/* Courses */}
+      {courses.length > 0 && (
+        <div className="mb-4">
+          <h2 className="text-2xl font-semibold">Courses</h2>
+          {courses.map((course, index) => (
+            <div key={index} className="mt-4">
+              <h3 className="text-lg font-semibold">{course.courseName}</h3>
+              <p className="text-sm italic">{course.institution}</p>
+              <p className="text-sm">{course.startDate} - {course.endDate}</p>
+            </div>
+          ))}
+        </div>
+      )}
 
-      <h3>Courses</h3>
-      <ul>
-        {additionalSections.courses.map((course, index) => (
-          <li key={index}>
-            <strong>{course.courseName}</strong> at {course.institution} ({course.startDate} - {course.endDate})
-          </li>
-        ))}
-      </ul>
+      {/* Projects */}
+      {projects.length > 0 && (
+        <div className="mb-4">
+          <h2 className="text-2xl font-semibold">Projects</h2>
+          {projects.map((project, index) => (
+            <div key={index} className="mt-4">
+              <h3 className="text-lg font-semibold">{project.projectName}</h3>
+              <p className="text-sm">{project.projectDescription}</p>
+              <p className="text-sm">{project.startDate} - {project.endDate}</p>
+            </div>
+          ))}
+        </div>
+      )}
 
-      <h3>References</h3>
-      <ul>
-        {additionalSections.references.map((reference, index) => (
-          <li key={index}>
-            {reference.referentName}, {reference.referentCompany} - {reference.referentEmail}, {reference.referentPhone}
-          </li>
-        ))}
-      </ul>
+      {/* References */}
+      {references.length > 0 && (
+        <div className="mb-4">
+          <h2 className="text-2xl font-semibold">References</h2>
+          {references.map((reference, index) => (
+            <div key={index} className="mt-4">
+              <h3 className="text-lg font-semibold">{reference.referentName}</h3>
+              <p className="text-sm">{reference.referentCompany}</p>
+              <p className="text-sm">{reference.referentEmail}</p>
+              <p className="text-sm">{reference.referentPhone}</p>
+            </div>
+          ))}
+        </div>
+      )}
 
-      <h3>Projects</h3>
-      <ul>
-        {additionalSections.projects.map((project, index) => (
-          <li key={index}>
-            <strong>{project.projectName}</strong> ({project.startDate} - {project.endDate})
-            <p>{project.projectDescription}</p>
-          </li>
-        ))}
-      </ul>
-
-      <h3>Website Links</h3>
-      <ul>
-        {additionalSections.websiteLinks.map((link, index) => (
-          <li key={index}>
-            <a href={link.url} target="_blank" rel="noopener noreferrer">{link.linkTitle}</a>
-          </li>
-        ))}
-      </ul>
+      {/* Website Links */}
+      {websiteLinks.length > 0 && (
+        <div className="mb-4">
+          <h2 className="text-2xl font-semibold">Website Links</h2>
+          <ul>
+            {websiteLinks.map((link, index) => (
+              <li key={index} className="text-sm">
+                <a href={link.url} target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:underline">
+                  {link.linkTitle}
+                </a>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
     </div>
   );
 };

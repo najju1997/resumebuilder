@@ -3,7 +3,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import { addEmploymentHistory, updateEmploymentHistory, removeEmploymentHistory } from '../../redux/slices/resumeSlice';
 import DateRangeInput from '../common/DateRangeInput';
 
-const EmploymentHistoryForm = ({ onNext, onPrevious, isLastForm }) => {
+const EmploymentHistoryForm = ({ onNext, onPrevious }) => {
   const dispatch = useDispatch();
   const employmentHistory = useSelector((state) => state.resume.employmentHistory);
 
