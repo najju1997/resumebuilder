@@ -14,6 +14,7 @@ const initialState = {
     address: '',
     postalCode: '',
   },
+  professionalSummary: "",
   employmentHistory: [],
   skills: [],
   education: [],
@@ -65,6 +66,9 @@ const resumeSlice = createSlice({
     },
     removeEducation(state, action) {
       state.education.splice(action.payload, 1);
+    },
+    setProfessionalSummary(state,action) {
+      state.professionalSummary.push(action.payload);
     },
     addInternship(state, action) {
       state.additionalSections.internships.push(action.payload);
@@ -131,6 +135,7 @@ export const {
   addEducation,
   updateEducation,
   removeEducation,
+  setProfessionalSummary,
   addInternship,
   updateInternship,
   removeInternship,

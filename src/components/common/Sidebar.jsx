@@ -37,6 +37,11 @@ const Sidebar = ({ onSelectSection, activeSections, onDeleteSection }) => {
             Education
           </button>
         </li>
+        <li>
+          <button className="w-full text-left" onClick={() => onSelectSection('professional-summary')}>
+            Professional Summary
+          </button>
+        </li>
 
         {/* Dynamically added sections */}
         {activeSections.map((section) => (

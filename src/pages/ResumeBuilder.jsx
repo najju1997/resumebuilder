@@ -4,6 +4,7 @@ import ContactInformationForm from '../components/forms/ContactInformationForm';
 import EmploymentHistoryForm from '../components/forms/EmploymentHistoryForm';
 import SkillsForm from '../components/forms/SkillsForm';
 import EducationForm from '../components/forms/EducationForm';
+import ProfessionalSummaryForm from '../components/forms/ProfessionalSummaryForm';
 import InternshipForm from '../components/forms/additionalSections/InternshipForm';
 import CoursesForm from '../components/forms/additionalSections/CoursesForm';
 import ProjectsForm from '../components/forms/additionalSections/ProjectsForm';
@@ -19,6 +20,7 @@ const sections = [
   'employment-history',
   'skills',
   'education',
+  'professional-summary'
 ];
 
 const allAdditionalSections = [
@@ -31,7 +33,7 @@ const allAdditionalSections = [
 
 const ResumeBuilder = () => {
   const [selectedSection, setSelectedSection] = useState('personal-details');
-  const [activeSections, setActiveSections] = useState([]);
+  const [activeSections, setActiveSections] = useState([]); // active or selected from additional section
   const [availableAdditionalSections, setAvailableAdditionalSections] = useState(allAdditionalSections);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
@@ -63,12 +65,19 @@ const ResumeBuilder = () => {
     const sectionToRemove = activeSections.find(section => section.id === sectionId);
     if (sectionToRemove) {
       setAvailableAdditionalSections([...availableAdditionalSections, sectionToRemove]);
-      setActiveSections(activeSections.filter(section => section.id !== sectionId));
-      if (selectedSection === sectionId) {
-        setSelectedSection('personal-details');
+  
+      const newActiveSections = activeSections.filter(section => section.id !== sectionId);
+      setActiveSections(newActiveSections);
+  
+      if (newActiveSections.length > 0) {
+        setSelectedSection(newActiveSections[newActiveSections.length - 1].id);
+      } else {
+        // Select the last default section by string if no additional sections are left
+        setSelectedSection(sections[sections.length - 1]);
       }
     }
   };
+  
 
   const renderForm = () => {
     const currentIndex = [...sections, ...activeSections.map(s => s.id)].indexOf(selectedSection);
@@ -85,6 +94,8 @@ const ResumeBuilder = () => {
         return <SkillsForm onNext={!isLastSection && handleNext} onPrevious={handlePrevious} />;
       case 'education':
         return <EducationForm onNext={!isLastSection && handleNext} onPrevious={handlePrevious} />;
+      case 'professional-summary':
+        return <ProfessionalSummaryForm onNext={!isLastSection && handleNext} onPrevious={handlePrevious} />;
       case 'internships':
         return <InternshipForm onNext={!isLastSection && handleNext} onPrevious={handlePrevious} />;
       case 'courses':
@@ -109,60 +120,35 @@ const ResumeBuilder = () => {
   };
 
   return (
-    <div className="flex flex-col md:flex-row h-screen overflow-hidden">
-      {/* Mobile Header */}
-      <div className="md:hidden w-full flex justify-between p-4 bg-gray-200">
-        <button onClick={() => setIsSidebarOpen(!isSidebarOpen)} className="text-xl">
-          ☰
-        </button>
-        <button onClick={() => setIsPreviewOpen(!isPreviewOpen)} className="text-xl">
-          Preview
-        </button>
-      </div>
-
-      {/* Sidebar */}
-      <div
-        className={`fixed md:relative bg-gray-200 h-full z-20 transform ${
-          isSidebarOpen ? 'translate-x-0' : '-translate-x-full'
-        } md:translate-x-0 transition-transform duration-200 ease-in-out w-1/5`}
-      >
-        <button
-          className="md:hidden absolute top-4 right-4 text-xl"
-          onClick={() => setIsSidebarOpen(false)}
-        >
-          ✕
-        </button>
-        <Sidebar
-          onSelectSection={setSelectedSection}
-          activeSections={activeSections}
-          onDeleteSection={handleDeleteSection}
-        />
-      </div>
-
-      {/* Form Section */}
-      <div className="w-full md:w-2/5 p-6 h-full overflow-y-auto">
-        <h1 className="text-3xl font-bold mb-6">Build Your Resume</h1>
-        {renderForm()}
-      </div>
-
-      {/* Preview Section */}
-      <div
-        className={`fixed md:relative z-20 transform ${
-          isPreviewOpen ? 'translate-x-0' : 'translate-x-full'
-        } md:translate-x-0 transition-transform duration-200 ease-in-out bg-gray-100 h-full w-full md:w-2/5 flex justify-center items-start`}
-      >
-        <button
-          className="md:hidden absolute top-4 right-4 text-xl"
-          onClick={() => setIsPreviewOpen(false)}
-        >
-          ✕
-        </button>
-        <div className="bg-white shadow-md w-full max-w-[210mm] h-full max-h-[297mm] p-8">
-          <ResumePreview />
-        </div>
-      </div>
+<div className="flex h-screen overflow-hidden">
+  {/* Sidebar and Form Container */}
+  <div className="flex w-2/5 h-full">
+    {/* Sidebar */}
+    <div className="w-1/5 bg-gray-200 overflow-y-auto text-sm">
+      <Sidebar
+        onSelectSection={setSelectedSection}
+        activeSections={activeSections}
+        onDeleteSection={handleDeleteSection}
+      />
     </div>
+
+    {/* Form Section */}
+    <div className="w-4/5 p-6 overflow-y-auto">
+      <h1 className="text-3xl font-bold mb-6">Build Your Resume</h1>
+      {renderForm()}
+    </div>
+  </div>
+
+  {/* Preview Section */}
+  <div className="flex w-3/5 h-full bg-gray-100 justify-center items-start">
+    <ResumePreview />
+  </div>
+</div>
+
+
+
   );
+  
 };
 
 export default ResumeBuilder;
