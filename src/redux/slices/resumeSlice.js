@@ -68,7 +68,7 @@ const resumeSlice = createSlice({
       state.education.splice(action.payload, 1);
     },
     setProfessionalSummary(state,action) {
-      state.professionalSummary.push(action.payload);
+      state.professionalSummary= action.payload;
     },
     addInternship(state, action) {
       state.additionalSections.internships.push(action.payload);

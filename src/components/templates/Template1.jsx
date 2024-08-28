@@ -3,6 +3,7 @@ import { useSelector } from 'react-redux';
 
 const Template1 = () => {
   const personalDetails = useSelector((state) => state.resume.personalDetails);
+  const professionalSummary = useSelector((state) => state.resume.professionalSummary);
   const contactInformation = useSelector((state) => state.resume.contactInformation);
   const employmentHistory = useSelector((state) => state.resume.employmentHistory);
   const skills = useSelector((state) => state.resume.skills);
@@ -24,6 +25,14 @@ const Template1 = () => {
         <p className="text-sm">{contactInformation.phone}</p>
       </div>
       <hr className="my-4 border-gray-300" />
+
+            {/* Professional Summary */}
+            {professionalSummary && (
+        <div className="mb-4">
+          
+          <p className="text-sm">{professionalSummary}</p>
+        </div>
+      )}
 
       {/* Employment History */}
       {employmentHistory.length > 0 && (
