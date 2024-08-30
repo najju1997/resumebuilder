@@ -4,6 +4,7 @@ const initialState = {
   isSidebarOpen: true,
   isModalOpen: false,
   progress: 0, // Progress percentage for the resume completion
+  user: null, // Store user data here
 };
 
 const uiSlice = createSlice({
@@ -22,9 +23,17 @@ const uiSlice = createSlice({
     setProgress: (state, action) => {
       state.progress = action.payload;
     },
+    setUser: (state, action) => {
+      state.user = action.payload;
+      localStorage.setItem('user', JSON.stringify(action.payload)); // Persist user data
+    },
+    logoutUser: (state) => {
+      state.user = null;
+      localStorage.removeItem('user');
+    },
   },
 });
 
-export const { toggleSidebar, openModal, closeModal, setProgress } = uiSlice.actions;
+export const { toggleSidebar, openModal, closeModal, setProgress, setUser, logoutUser } = uiSlice.actions;
 
 export default uiSlice.reducer;

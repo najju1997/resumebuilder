@@ -1,4 +1,5 @@
 import { createSlice } from '@reduxjs/toolkit';
+import { saveResume } from '../../api/resumeapi';
 
 const initialState = {
   personalDetails: {
@@ -18,13 +19,11 @@ const initialState = {
   employmentHistory: [],
   skills: [],
   education: [],
-  additionalSections: {
-    internships: [],
-    courses: [],
-    projects: [],
-    references: [],
-    websiteLinks: [],
-  },
+  internships: [],
+  courses: [],
+  projects: [],
+  references: [],
+  websiteLinks: [],
 };
 
 const resumeSlice = createSlice({
@@ -33,95 +32,131 @@ const resumeSlice = createSlice({
   reducers: {
     setPersonalDetails(state, action) {
       state.personalDetails = action.payload;
+      saveResumeToBackend(state);
     },
     setContactInformation(state, action) {
       state.contactInformation = action.payload;
+      saveResumeToBackend(state);
     },
     addEmploymentHistory(state, action) {
       state.employmentHistory.push(action.payload);
+      saveResumeToBackend(state);
     },
     updateEmploymentHistory(state, action) {
       const { index, ...updatedEmployment } = action.payload;
       state.employmentHistory[index] = updatedEmployment;
+      saveResumeToBackend(state);
     },
     removeEmploymentHistory(state, action) {
       state.employmentHistory.splice(action.payload, 1);
+      saveResumeToBackend(state);
     },
     addSkill(state, action) {
       state.skills.push(action.payload);
+      saveResumeToBackend(state);
     },
     updateSkill(state, action) {
       const { index, ...updatedSkill } = action.payload;
       state.skills[index] = updatedSkill;
+      saveResumeToBackend(state);
     },
     removeSkill(state, action) {
       state.skills.splice(action.payload, 1);
+      saveResumeToBackend(state);
     },
     addEducation(state, action) {
       state.education.push(action.payload);
+      saveResumeToBackend(state);
     },
     updateEducation(state, action) {
       const { index, ...updatedEducation } = action.payload;
       state.education[index] = updatedEducation;
+      saveResumeToBackend(state);
     },
     removeEducation(state, action) {
       state.education.splice(action.payload, 1);
+      saveResumeToBackend(state);
     },
-    setProfessionalSummary(state,action) {
-      state.professionalSummary= action.payload;
+    setProfessionalSummary(state, action) {
+      state.professionalSummary = action.payload;
+      saveResumeToBackend(state);
     },
     addInternship(state, action) {
-      state.additionalSections.internships.push(action.payload);
+      state.internships.push(action.payload);
+      saveResumeToBackend(state);
     },
     updateInternship(state, action) {
       const { index, ...updatedInternship } = action.payload;
-      state.additionalSections.internships[index] = updatedInternship;
+      state.internships[index] = updatedInternship;
+      saveResumeToBackend(state);
     },
     removeInternship(state, action) {
-      state.additionalSections.internships.splice(action.payload, 1);
+      state.internships.splice(action.payload, 1);
+      saveResumeToBackend(state);
     },
     addCourse(state, action) {
-      state.additionalSections.courses.push(action.payload);
+      state.courses.push(action.payload);
+      saveResumeToBackend(state);
     },
     updateCourse(state, action) {
       const { index, ...updatedCourse } = action.payload;
-      state.additionalSections.courses[index] = updatedCourse;
+      state.courses[index] = updatedCourse;
+      saveResumeToBackend(state);
     },
     removeCourse(state, action) {
-      state.additionalSections.courses.splice(action.payload, 1);
+      state.courses.splice(action.payload, 1);
+      saveResumeToBackend(state);
     },
     addProject(state, action) {
-      state.additionalSections.projects.push(action.payload);
+      state.projects.push(action.payload);
+      saveResumeToBackend(state);
     },
     updateProject(state, action) {
       const { index, ...updatedProject } = action.payload;
-      state.additionalSections.projects[index] = updatedProject;
+      state.projects[index] = updatedProject;
+      saveResumeToBackend(state);
     },
     removeProject(state, action) {
-      state.additionalSections.projects.splice(action.payload, 1);
+      state.projects.splice(action.payload, 1);
+      saveResumeToBackend(state);
     },
     addReference(state, action) {
-      state.additionalSections.references.push(action.payload);
+      state.references.push(action.payload);
+      saveResumeToBackend(state);
     },
     updateReference(state, action) {
       const { index, ...updatedReference } = action.payload;
-      state.additionalSections.references[index] = updatedReference;
+      state.references[index] = updatedReference;
+      saveResumeToBackend(state);
     },
     removeReference(state, action) {
-      state.additionalSections.references.splice(action.payload, 1);
+      state.references.splice(action.payload, 1);
+      saveResumeToBackend(state);
     },
     addWebsiteLink(state, action) {
-      state.additionalSections.websiteLinks.push(action.payload);
+      state.websiteLinks.push(action.payload);
+      saveResumeToBackend(state);
     },
     updateWebsiteLink(state, action) {
       const { index, ...updatedLink } = action.payload;
-      state.additionalSections.websiteLinks[index] = updatedLink;
+      state.websiteLinks[index] = updatedLink;
+      saveResumeToBackend(state);
     },
     removeWebsiteLink(state, action) {
-      state.additionalSections.websiteLinks.splice(action.payload, 1);
+      state.websiteLinks.splice(action.payload, 1);
+      saveResumeToBackend(state);
     },
   },
 });
+
+const saveResumeToBackend = async (resumeData) => {
+  try {
+    const token = JSON.parse(localStorage.getItem('user')).token;
+    await saveResume(resumeData, token);
+  } catch (error) {
+    console.error('Error saving resume data:', error);
+  }
+};
 
 export const {
   setPersonalDetails,
