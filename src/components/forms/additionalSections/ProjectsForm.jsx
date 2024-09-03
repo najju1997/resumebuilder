@@ -5,7 +5,7 @@ import DateRangeInput from '../../common/DateRangeInput';
 
 const ProjectsForm = ({ onNext, onPrevious, isLastForm }) => {
   const dispatch = useDispatch();
-  const projects = useSelector((state) => state.resume.additionalSections.projects);
+  const projects = useSelector((state) => state.resume.projects);
 
   const [expandedIndex, setExpandedIndex] = useState(null);
 

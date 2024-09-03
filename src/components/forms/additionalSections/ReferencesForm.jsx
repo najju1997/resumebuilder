@@ -4,7 +4,7 @@ import { addReference, removeReference } from '../../../redux/slices/resumeSlice
 
 const ReferencesForm = ({ onNext, onPrevious }) => {
   const dispatch = useDispatch();
-  const references = useSelector((state) => state.resume.additionalSections.references);
+  const references = useSelector((state) => state.resume.references);
 
   const [referenceDetails, setReferenceDetails] = useState({
     referentName: '',

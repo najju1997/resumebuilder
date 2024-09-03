@@ -5,7 +5,7 @@ import DateRangeInput from '../../common/DateRangeInput';
 
 const InternshipForm = ({ onNext, onPrevious, isLastForm }) => {
   const dispatch = useDispatch();
-  const internships = useSelector((state) => state.resume.additionalSections.internships);
+  const internships = useSelector((state) => state.resume.internships);
 
   const [expandedIndex, setExpandedIndex] = useState(null);
 

@@ -1,9 +1,9 @@
 // src/components/Auth/Signup.jsx
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
-import { signup } from '../../api/authapi';
-import { setUser } from '../../redux/slices/uiSlice';
+import { signup } from '../api/authapi';
+import { setUser } from '../redux/slices/uiSlice';
 
 const Signup = () => {
   const [username, setUsername] = useState('');

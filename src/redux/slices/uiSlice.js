@@ -12,9 +12,6 @@ const uiSlice = createSlice({
   initialState,
   reducers: {
     toggleSidebar: (state) => {
-      state.isSidebarOpen = !state.isSidebarOpen;
-    },
-    openModal: (state) => {
       state.isModalOpen = true;
     },
     closeModal: (state) => {

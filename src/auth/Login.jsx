@@ -1,9 +1,8 @@
-// src/components/Auth/Login.jsx
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
-import { login } from '../../api/authapi';
-import { setUser } from '../../redux/slices/uiSlice';
+import { login } from '../api/authapi';
+import { setUser } from '../redux/slices/uiSlice';
 
 const Login = () => {
   const [email, setEmail] = useState('');
@@ -16,8 +15,16 @@ const Login = () => {
     e.preventDefault();
     try {
       const data = await login({ email, password });
-      dispatch(setUser(data)); // Store user data in Redux store
-      navigate('/resume-builder'); // Redirect to the resume builder after successful login
+      const { token, user } = data;
+
+      // Store token in localStorage
+      localStorage.setItem('token', token);
+
+      // Store user data in Redux store
+      dispatch(setUser(user));
+
+      // Redirect to the resume builder after successful login
+      navigate('/resume-builder');
     } catch (err) {
       setError(err.message || 'Login failed');
     }

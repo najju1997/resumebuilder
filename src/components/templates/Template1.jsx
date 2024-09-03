@@ -8,11 +8,11 @@ const Template1 = () => {
   const employmentHistory = useSelector((state) => state.resume.employmentHistory);
   const skills = useSelector((state) => state.resume.skills);
   const education = useSelector((state) => state.resume.education);
-  const internships = useSelector((state) => state.resume.additionalSections.internships);
-  const courses = useSelector((state) => state.resume.additionalSections.courses);
-  const projects = useSelector((state) => state.resume.additionalSections.projects);
-  const references = useSelector((state) => state.resume.additionalSections.references);
-  const websiteLinks = useSelector((state) => state.resume.additionalSections.websiteLinks);
+  const internships = useSelector((state) => state.resume.internships);
+  const courses = useSelector((state) => state.resume.courses);
+  const projects = useSelector((state) => state.resume.projects);
+  const references = useSelector((state) => state.resume.references);
+  const websiteLinks = useSelector((state) => state.resume.websiteLinks);
 
   return (
     <div className="bg-white p-8" style={{ width: '210mm', height: '297mm' }}>

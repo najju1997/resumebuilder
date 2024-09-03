@@ -1,39 +1,19 @@
-// routes/resumeRoutes.js
-const express = require('express');
-const Resume = require('../models/Resume');
-const auth = require('../middleware/authMiddleware');
+import express from 'express';
+import { getResumes, saveResume, deleteResume, renameResume } from '../controllers/resumeController.js';
+import authMiddleware from '../middleware/authMiddleware.js';
+
 const router = express.Router();
 
-// Save or update resume
-router.post('/save', auth, async (req, res) => {
-  try {
-    const resumeData = req.body;
-    let resume = await Resume.findOne({ userId: req.user.id });
+// Route to get all resumes for the authenticated user
+router.get('/all', authMiddleware, getResumes);
 
-    if (resume) {
-      resume = await Resume.findByIdAndUpdate(resume._id, resumeData, { new: true });
-    } else {
-      resume = new Resume({ ...resumeData, userId: req.user.id });
-      await resume.save();
-    }
+// Route to save or update a resume
+router.post('/save', authMiddleware, saveResume);
 
-    res.json(resume);
-  } catch (err) {
-    res.status(500).json({ message: 'Server error' });
-  }
-});
+// Route to delete a specific resume
+router.delete('/delete/:id', authMiddleware, deleteResume);
 
-// Get resume
-router.get('/get', auth, async (req, res) => {
-  try {
-    const resume = await Resume.findOne({ userId: req.user.id });
-    if (!resume) {
-      return res.status(404).json({ message: 'Resume not found' });
-    }
-    res.json(resume);
-  } catch (err) {
-    res.status(500).json({ message: 'Server error' });
-  }
-});
+// Route to rename a specific resume
+router.put('/rename/:id', authMiddleware, renameResume);
 
-module.exports = router;
+export default router;

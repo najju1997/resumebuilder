@@ -4,7 +4,7 @@ import { addWebsiteLink, removeWebsiteLink } from '../../../redux/slices/resumeS
 
 const WebsiteLinksForm = ({ onNext, onPrevious }) => {
   const dispatch = useDispatch();
-  const websiteLinks = useSelector((state) => state.resume.additionalSections.websiteLinks);
+  const websiteLinks = useSelector((state) => state.resume.websiteLinks);
 
   const [linkDetails, setLinkDetails] = useState({
     linkTitle: '',

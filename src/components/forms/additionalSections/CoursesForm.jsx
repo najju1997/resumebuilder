@@ -8,7 +8,7 @@ import { format, parse } from 'date-fns';
 
 const CoursesForm = ({ onNext, onPrevious }) => {
   const dispatch = useDispatch();
-  const courses = useSelector((state) => state.resume.additionalSections.courses);
+  const courses = useSelector((state) => state.resume.courses);
 
   const [expandedIndex, setExpandedIndex] = useState(null);
   const [dateError, setDateError] = useState(null);
