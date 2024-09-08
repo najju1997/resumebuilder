@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom'; // Import useParams to access resumeId from URL
-import { createEmptyResume } from '../api/resumeapi'; // Import the API call to create an empty resume
+import { useNavigate, useParams } from 'react-router-dom';
+import { useDispatch, useSelector } from 'react-redux';
+import { fetchResume, updateField } from '../redux/slices/resumeSlice'; // Import the fetchResume and updateField actions
 import PersonalDetailsForm from '../components/forms/PersonalDetailsForm';
 import ContactInformationForm from '../components/forms/ContactInformationForm';
 import EmploymentHistoryForm from '../components/forms/EmploymentHistoryForm';
@@ -35,35 +36,30 @@ const allAdditionalSections = [
 
 const ResumeBuilder = () => {
   const { resumeId } = useParams(); // Get resumeId from URL parameters
+  const dispatch = useDispatch(); // Use dispatch to call actions
+  const navigate = useNavigate(); // For navigation
+  const token = localStorage.getItem('token'); // Get token from localStorage
+
+  // Access resume data and status from Redux store
+  const resumeData = useSelector((state) => state.resume);
+
   const [selectedSection, setSelectedSection] = useState('personal-details');
   const [activeSections, setActiveSections] = useState([]);
   const [availableAdditionalSections, setAvailableAdditionalSections] = useState(allAdditionalSections);
-  const [newResumeId, setNewResumeId] = useState(null); // Store resumeId when generated
-  const navigate = useNavigate(); // To handle redirection
 
-  // Fetch or create a resume based on resumeId
   useEffect(() => {
-    const createResume = async () => {
-      try {
-        // Check if resumeId exists
-        if (resumeId) {
-          console.log('Editing existing resume with ID:', resumeId);
-          setNewResumeId(resumeId);
-        } else {
-          // Create a new empty resume if no resumeId is found in URL
-          const newResumeId = await createEmptyResume();
-          setNewResumeId(newResumeId);
+    if (resumeId) {
+      // Fetch the resume from the backend
+      dispatch(fetchResume({ resumeId, token }));
+    } else {
+      // If no resumeId, redirect or handle accordingly
+    }
+  }, [resumeId, token, dispatch]);
 
-          // Redirect to the new URL with the generated resumeId
-          navigate(`/resume-builder/${newResumeId}`);
-        }
-      } catch (error) {
-        console.error('Error creating empty resume:', error);
-      }
-    };
-
-    createResume();
-  }, [resumeId, navigate]);
+  // Handler for updating form inputs
+  const handleInputChange = (field, value) => {
+    dispatch(updateField({ field, value })); // Update Redux state and backend
+  };
 
   const handleNext = () => {
     const currentIndex = [...sections, ...activeSections.map(s => s.id)].indexOf(selectedSection);
@@ -110,27 +106,103 @@ const ResumeBuilder = () => {
 
     switch (selectedSection) {
       case 'personal-details':
-        return <PersonalDetailsForm onNext={handleNext} />;
+        return (
+          <PersonalDetailsForm
+            data={resumeData.personalDetails}
+            onChange={(field, value) => handleInputChange('personalDetails', { ...resumeData.personalDetails, [field]: value })}
+            onNext={handleNext}
+          />
+        );
       case 'contact-information':
-        return <ContactInformationForm onNext={!isLastSection && handleNext} onPrevious={handlePrevious} />;
+        return (
+          <ContactInformationForm
+            data={resumeData.contactInformation}
+            onChange={(field, value) => handleInputChange('contactInformation', { ...resumeData.contactInformation, [field]: value })}
+            onNext={!isLastSection && handleNext}
+            onPrevious={handlePrevious}
+          />
+        );
       case 'employment-history':
-        return <EmploymentHistoryForm onNext={!isLastSection && handleNext} onPrevious={handlePrevious} />;
+        return (
+          <EmploymentHistoryForm
+            data={resumeData.employmentHistory}
+            onChange={(field, value) => handleInputChange('employmentHistory', { ...resumeData.employmentHistory, [field]: value })}
+            onNext={!isLastSection && handleNext}
+            onPrevious={handlePrevious}
+          />
+        );
       case 'skills':
-        return <SkillsForm onNext={!isLastSection && handleNext} onPrevious={handlePrevious} />;
+        return (
+          <SkillsForm
+            data={resumeData.skills}
+            onChange={(field, value) => handleInputChange('skills', { ...resumeData.skills, [field]: value })}
+            onNext={!isLastSection && handleNext}
+            onPrevious={handlePrevious}
+          />
+        );
       case 'education':
-        return <EducationForm onNext={!isLastSection && handleNext} onPrevious={handlePrevious} />;
+        return (
+          <EducationForm
+            data={resumeData.education}
+            onChange={(field, value) => handleInputChange('education', { ...resumeData.education, [field]: value })}
+            onNext={!isLastSection && handleNext}
+            onPrevious={handlePrevious}
+          />
+        );
       case 'professional-summary':
-        return <ProfessionalSummaryForm onNext={!isLastSection && handleNext} onPrevious={handlePrevious} />;
+        return (
+          <ProfessionalSummaryForm
+            data={resumeData.professionalSummary}
+            onChange={(field, value) => handleInputChange('professionalSummary', value)}
+            onNext={!isLastSection && handleNext}
+            onPrevious={handlePrevious}
+          />
+        );
       case 'internships':
-        return <InternshipForm onNext={!isLastSection && handleNext} onPrevious={handlePrevious} />;
+        return (
+          <InternshipForm
+            data={resumeData.internships}
+            onChange={(field, value) => handleInputChange('internships', { ...resumeData.internships, [field]: value })}
+            onNext={!isLastSection && handleNext}
+            onPrevious={handlePrevious}
+          />
+        );
       case 'courses':
-        return <CoursesForm onNext={!isLastSection && handleNext} onPrevious={handlePrevious} />;
+        return (
+          <CoursesForm
+            data={resumeData.courses}
+            onChange={(field, value) => handleInputChange('courses', { ...resumeData.courses, [field]: value })}
+            onNext={!isLastSection && handleNext}
+            onPrevious={handlePrevious}
+          />
+        );
       case 'projects':
-        return <ProjectsForm onNext={!isLastSection && handleNext} onPrevious={handlePrevious} />;
+        return (
+          <ProjectsForm
+            data={resumeData.projects}
+            onChange={(field, value) => handleInputChange('projects', { ...resumeData.projects, [field]: value })}
+            onNext={!isLastSection && handleNext}
+            onPrevious={handlePrevious}
+          />
+        );
       case 'references':
-        return <ReferencesForm onNext={!isLastSection && handleNext} onPrevious={handlePrevious} />;
+        return (
+          <ReferencesForm
+            data={resumeData.references}
+            onChange={(field, value) => handleInputChange('references', { ...resumeData.references, [field]: value })}
+            onNext={!isLastSection && handleNext}
+            onPrevious={handlePrevious}
+          />
+        );
       case 'website-links':
-        return <WebsiteLinksForm onNext={!isLastSection && handleNext} onPrevious={handlePrevious} />;
+        return (
+          <WebsiteLinksForm
+            data={resumeData.websiteLinks}
+            onChange={(field, value) => handleInputChange('websiteLinks', { ...resumeData.websiteLinks, [field]: value })}
+            onNext={!isLastSection && handleNext}
+            onPrevious={handlePrevious}
+          />
+        );
       case 'additional-section':
         return (
           <AdditionalSectionSelection
@@ -166,7 +238,7 @@ const ResumeBuilder = () => {
 
       {/* Preview Section */}
       <div className="flex w-3/5 h-full bg-gray-100 justify-center items-start">
-        <ResumePreview />
+        <ResumePreview data={resumeData} /> {/* Pass the data to the preview */}
       </div>
     </div>
   );

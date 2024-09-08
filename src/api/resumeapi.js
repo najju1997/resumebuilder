@@ -67,13 +67,18 @@ export const saveResume = async (resumeData, token) => {
 };
 
 // Fetch a specific resume by ID (for editing purposes)
-export const getResumeById = async (id, token) => {
-  const response = await axios.get(`${API_URL}/get/${id}`, {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  });
-  return response;
+export const getResumeById = async (resumeId, token) => {
+  try {
+    const response = await axios.get(`${API_URL}/getresumebyid/${resumeId}`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    return response.data; // Return the fetched resume data
+  } catch (error) {
+    console.error('Error fetching resume:', error.response?.data || error.message);
+    throw error;
+  }
 };
 
 // Update a specific resume by ID (for editing purposes)

@@ -6,6 +6,7 @@ import {
   deleteResume,
   renameResume,
   updateResume,
+  getResumeById,
 } from '../controllers/resumeController.js';
 import authMiddleware from '../middleware/authMiddleware.js';
 
@@ -15,6 +16,9 @@ router.post('/create-empty', authMiddleware, createEmptyResume);
 
 // Route to get all resumes for the authenticated user
 router.get('/all', authMiddleware, getResumes);
+
+// Route to get resumes data by ID for the authenticated user
+router.get('/getresumebyid/:resumeId', authMiddleware, getResumeById);
 
 // Route to save or create a resume and return the resume ID
 router.post('/save', authMiddleware, saveResume);
