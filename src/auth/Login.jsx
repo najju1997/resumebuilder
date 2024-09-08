@@ -3,6 +3,7 @@ import { useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { login } from '../api/authapi';
 import { setUser } from '../redux/slices/uiSlice';
+import { resetResume } from '../redux/slices/resumeSlice';
 
 const Login = () => {
   const [email, setEmail] = useState('');
@@ -20,11 +21,13 @@ const Login = () => {
       // Store token in localStorage
       localStorage.setItem('token', token);
 
+      dispatch(resetResume()); // Clear any old data
+
       // Store user data in Redux store
       dispatch(setUser(user));
 
       // Redirect to the resume builder after successful login
-      navigate('/resume-builder');
+      navigate('/manage-resumes');
     } catch (err) {
       setError(err.message || 'Login failed');
     }

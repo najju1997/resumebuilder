@@ -1,9 +1,12 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { useDispatch } from 'react-redux';
+import { resetResume } from '../../redux/slices/resumeSlice';
 
 const Navbar = () => {
   const [token, setToken] = useState(localStorage.getItem('token'));
   const navigate = useNavigate();
+  const dispatch = useDispatch();
 
   useEffect(() => {
     const storedToken = localStorage.getItem('token');
@@ -12,10 +15,11 @@ const Navbar = () => {
   }, [[token]]);
 
   const handleLogout = () => {
-    localStorage.removeItem('token');
+    localStorage.clear();
+    dispatch(resetResume());
     console.log('Token removed, logging out...'); // Log for debugging when logging out
     setToken(null);
-    navigate('/login'); // Redirect to login after logout
+    navigate('/'); // Redirect to login after logout
   };
 
   return (

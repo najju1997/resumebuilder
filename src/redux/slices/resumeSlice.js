@@ -1,11 +1,19 @@
 import { createSlice } from '@reduxjs/toolkit';
-import { saveResume } from '../../api/resumeapi';
+import { saveResume, updateResume } from '../../api/resumeapi'; // Make sure to have an API to update a resume by ID
 
 // Helper function to load resume data from localStorage
 const loadState = () => {
   try {
     const serializedState = localStorage.getItem('resumeState');
-    return serializedState ? JSON.parse(serializedState) : undefined;
+    const parsedState = serializedState ? JSON.parse(serializedState) : undefined;
+
+    // Check if resumeId exists in the parsed state
+    if (parsedState && parsedState.resumeId) {
+      return parsedState; // Return the state if resumeId is valid
+    } else {
+      console.warn('No valid resumeId found in saved state');
+      return undefined; // Return undefined if resumeId is missing or invalid
+    }
   } catch (err) {
     console.error('Could not load state', err);
     return undefined;
@@ -22,7 +30,9 @@ const saveState = (state) => {
   }
 };
 
+
 const initialState = loadState() || {
+  resumeId: null, // Store the resumeId
   personalDetails: {
     firstName: '',
     lastName: '',
@@ -51,6 +61,9 @@ const resumeSlice = createSlice({
   name: 'resume',
   initialState,
   reducers: {
+    setResumeId(state, action) {
+      state.resumeId = action.payload; // Set resumeId when it's generated
+    },
     setPersonalDetails(state, action) {
       state.personalDetails = action.payload;
       saveState(state);
@@ -194,20 +207,32 @@ const resumeSlice = createSlice({
       saveState(state);
       saveResumeToBackend(state);
     },
+    resetResume(state) {
+      return initialState;
+    },
   },
 });
 
+// Function to save or update the resume in the backend
 const saveResumeToBackend = async (resumeData) => {
   try {
     const token = localStorage.getItem('token');
     if (!token) throw new Error('No token found');
-    await saveResume(resumeData, token);
+    console.log('resumeSlice passes the data ',resumeData.resumeId)
+    // Check if resumeId exists; if so, update the resume
+    if (resumeData.resumeId) {
+      await updateResume(resumeData.resumeId, resumeData, token);
+    } else {
+      // If no resumeId, create a new resume
+      await saveResume(resumeData, token);
+    }
   } catch (error) {
     console.error('Error saving resume data:', error.message || error);
   }
 };
 
 export const {
+  setResumeId, // Export the setResumeId action
   setPersonalDetails,
   setContactInformation,
   addEmploymentHistory,
@@ -235,6 +260,7 @@ export const {
   addWebsiteLink,
   updateWebsiteLink,
   removeWebsiteLink,
+  resetResume
 } = resumeSlice.actions;
 
 export default resumeSlice.reducer;

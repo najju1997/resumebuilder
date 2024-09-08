@@ -1,4 +1,6 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { useNavigate, useParams } from 'react-router-dom'; // Import useParams to access resumeId from URL
+import { createEmptyResume } from '../api/resumeapi'; // Import the API call to create an empty resume
 import PersonalDetailsForm from '../components/forms/PersonalDetailsForm';
 import ContactInformationForm from '../components/forms/ContactInformationForm';
 import EmploymentHistoryForm from '../components/forms/EmploymentHistoryForm';
@@ -32,11 +34,36 @@ const allAdditionalSections = [
 ];
 
 const ResumeBuilder = () => {
+  const { resumeId } = useParams(); // Get resumeId from URL parameters
   const [selectedSection, setSelectedSection] = useState('personal-details');
-  const [activeSections, setActiveSections] = useState([]); // active or selected from additional section
+  const [activeSections, setActiveSections] = useState([]);
   const [availableAdditionalSections, setAvailableAdditionalSections] = useState(allAdditionalSections);
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  const [isPreviewOpen, setIsPreviewOpen] = useState(false);
+  const [newResumeId, setNewResumeId] = useState(null); // Store resumeId when generated
+  const navigate = useNavigate(); // To handle redirection
+
+  // Fetch or create a resume based on resumeId
+  useEffect(() => {
+    const createResume = async () => {
+      try {
+        // Check if resumeId exists
+        if (resumeId) {
+          console.log('Editing existing resume with ID:', resumeId);
+          setNewResumeId(resumeId);
+        } else {
+          // Create a new empty resume if no resumeId is found in URL
+          const newResumeId = await createEmptyResume();
+          setNewResumeId(newResumeId);
+
+          // Redirect to the new URL with the generated resumeId
+          navigate(`/resume-builder/${newResumeId}`);
+        }
+      } catch (error) {
+        console.error('Error creating empty resume:', error);
+      }
+    };
+
+    createResume();
+  }, [resumeId, navigate]);
 
   const handleNext = () => {
     const currentIndex = [...sections, ...activeSections.map(s => s.id)].indexOf(selectedSection);
@@ -72,12 +99,10 @@ const ResumeBuilder = () => {
       if (newActiveSections.length > 0) {
         setSelectedSection(newActiveSections[newActiveSections.length - 1].id);
       } else {
-        // Select the last default section by string if no additional sections are left
         setSelectedSection(sections[sections.length - 1]);
       }
     }
   };
-  
 
   const renderForm = () => {
     const currentIndex = [...sections, ...activeSections.map(s => s.id)].indexOf(selectedSection);
@@ -120,35 +145,31 @@ const ResumeBuilder = () => {
   };
 
   return (
-<div className="flex h-screen overflow-hidden">
-  {/* Sidebar and Form Container */}
-  <div className="flex w-2/5 h-full">
-    {/* Sidebar */}
-    <div className="w-1/5 bg-gray-200 overflow-y-auto text-sm">
-      <Sidebar
-        onSelectSection={setSelectedSection}
-        activeSections={activeSections}
-        onDeleteSection={handleDeleteSection}
-      />
+    <div className="flex h-screen overflow-hidden">
+      {/* Sidebar and Form Container */}
+      <div className="flex w-2/5 h-full">
+        {/* Sidebar */}
+        <div className="w-1/5 bg-gray-200 overflow-y-auto text-sm">
+          <Sidebar
+            onSelectSection={setSelectedSection}
+            activeSections={activeSections}
+            onDeleteSection={handleDeleteSection}
+          />
+        </div>
+
+        {/* Form Section */}
+        <div className="w-4/5 p-6 overflow-y-auto">
+          <h1 className="text-3xl font-bold mb-6">Build Your Resume</h1>
+          {renderForm()}
+        </div>
+      </div>
+
+      {/* Preview Section */}
+      <div className="flex w-3/5 h-full bg-gray-100 justify-center items-start">
+        <ResumePreview />
+      </div>
     </div>
-
-    {/* Form Section */}
-    <div className="w-4/5 p-6 overflow-y-auto">
-      <h1 className="text-3xl font-bold mb-6">Build Your Resume</h1>
-      {renderForm()}
-    </div>
-  </div>
-
-  {/* Preview Section */}
-  <div className="flex w-3/5 h-full bg-gray-100 justify-center items-start">
-    <ResumePreview />
-  </div>
-</div>
-
-
-
   );
-  
 };
 
 export default ResumeBuilder;

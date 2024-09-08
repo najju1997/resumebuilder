@@ -28,9 +28,10 @@ const uiSlice = createSlice({
       state.user = null;
       localStorage.removeItem('user');
     },
+    resetState: () => initialState,
   },
 });
 
-export const { toggleSidebar, openModal, closeModal, setProgress, setUser, logoutUser } = uiSlice.actions;
+export const { toggleSidebar, openModal, closeModal, setProgress, setUser, logoutUser,resetState } = uiSlice.actions;
 
 export default uiSlice.reducer;

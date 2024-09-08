@@ -1,7 +1,9 @@
 import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchResumes, removeResume, updateResumeName } from '../redux/slices/resumeListSlice';
+import { resetResume, setResumeId } from '../redux/slices/resumeSlice'; 
 import { useNavigate } from 'react-router-dom';
+import { createEmptyResume } from '../api/resumeapi'; 
 
 const ManageResumes = () => {
   const dispatch = useDispatch();
@@ -11,16 +13,27 @@ const ManageResumes = () => {
   const [editNameId, setEditNameId] = useState(null);
   const [newName, setNewName] = useState('');
 
+  // Fetch resumes when the component mounts
   useEffect(() => {
     if (token) {
-      dispatch(fetchResumes(token));
+      console.log("Token found, dispatching fetchResumes...");
+      dispatch(fetchResumes(token)); // Fetch resumes from API using Redux
+    } else {
+      console.log("No token found.");
     }
   }, [dispatch, token]);
 
+  // Log the resumes state to check if data is being fetched
+  useEffect(() => {
+    console.log("Resumes state:", resumes);
+  }, [resumes]);
+
+  // Handle deleting a resume
   const handleDelete = (id) => {
     dispatch(removeResume({ id, token }));
   };
 
+  // Handle renaming a resume
   const handleRename = (id) => {
     if (newName.trim()) {
       dispatch(updateResumeName({ id, name: newName, token }));
@@ -29,9 +42,22 @@ const ManageResumes = () => {
     }
   };
 
-  const handleStartNew = () => {
-    // Redirect to the resume builder with a new resume
-    navigate('/resume-builder');
+  // Handle starting a new resume
+  const handleStartNew = async () => {
+    try {
+      const newResumeId = await createEmptyResume(); // Create a new empty resume
+      dispatch(resetResume()); 
+      dispatch(setResumeId(newResumeId)); 
+      navigate(`/resume-builder/${newResumeId}`);
+    } catch (error) {
+      console.error('Error creating new resume:', error);
+    }
+  };
+
+  // Handle editing a resume (redirect to the builder with the existing resumeId)
+  const handleEditResume = (resumeId) => {
+    dispatch(setResumeId(resumeId)); 
+    navigate(`/resume-builder/${resumeId}`); 
   };
 
   return (
@@ -48,8 +74,23 @@ const ManageResumes = () => {
       <div className="resumes-list">
         {resumes.map((resume) => (
           <div key={resume._id} className="resume-item border p-4 mb-4 rounded-md">
-            {editNameId === resume._id ? (
-              <div className="flex">
+            <div className="flex justify-between">
+              <h2 className="text-xl font-semibold">{resume.personalDetails?.firstName || 'Untitled Resume'}</h2>
+              <div>
+                <button onClick={() => setEditNameId(resume._id)} className="bg-yellow-500 text-white py-2 px-4 rounded-md mr-2">
+                  Rename
+                </button>
+                <button onClick={() => handleEditResume(resume._id)} className="bg-blue-500 text-white py-2 px-4 rounded-md mr-2">
+                  Edit
+                </button>
+                <button onClick={() => handleDelete(resume._id)} className="bg-red-500 text-white py-2 px-4 rounded-md">
+                  Delete
+                </button>
+              </div>
+            </div>
+
+            {editNameId === resume._id && (
+              <div className="flex mt-4">
                 <input
                   type="text"
                   value={newName}
@@ -62,18 +103,6 @@ const ManageResumes = () => {
                 <button onClick={() => setEditNameId(null)} className="bg-gray-500 text-white py-2 px-4 rounded-md ml-2">
                   Cancel
                 </button>
-              </div>
-            ) : (
-              <div className="flex justify-between">
-                <h2 className="text-xl font-semibold">{resume.name}</h2>
-                <div>
-                  <button onClick={() => setEditNameId(resume._id)} className="bg-yellow-500 text-white py-2 px-4 rounded-md mr-2">
-                    Rename
-                  </button>
-                  <button onClick={() => handleDelete(resume._id)} className="bg-red-500 text-white py-2 px-4 rounded-md">
-                    Delete
-                  </button>
-                </div>
               </div>
             )}
           </div>

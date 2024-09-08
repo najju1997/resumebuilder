@@ -1,6 +1,19 @@
 import axios from 'axios';
 
-const API_URL = 'http://localhost:5000/api/resume'; // Adjust the base URL according to your backend setup
+const API_URL = 'http://localhost:5000/api/resume'; // very important // Adjust the base URL according to your backend setup
+
+// Function to create an empty resume and return the resume ID
+export const createEmptyResume = async () => {
+  const token = localStorage.getItem('token');
+  const response = await axios.post(`${API_URL}/create-empty`, {}, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  // Return the newly created resume ID
+  return response.data.resumeId;
+};
 
 // Fetch all resumes for the logged-in user
 export const getResumes = async (token) => {
@@ -9,7 +22,14 @@ export const getResumes = async (token) => {
       Authorization: `Bearer ${token}`,
     },
   });
-  return response;
+
+  // Map resumes to include titleName from personalDetails firstName
+  const resumesWithTitles = response.data.map((resume) => {
+    const titleName = resume.personalDetails.firstName || 'Untitled';
+    return { ...resume, titleName };
+  });
+
+  return { data: resumesWithTitles };
 };
 
 // Delete a specific resume by ID
@@ -44,4 +64,30 @@ export const saveResume = async (resumeData, token) => {
     },
   });
   return response;
+};
+
+// Fetch a specific resume by ID (for editing purposes)
+export const getResumeById = async (id, token) => {
+  const response = await axios.get(`${API_URL}/get/${id}`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+  return response;
+};
+
+// Update a specific resume by ID (for editing purposes)
+export const updateResume = async (resumeId, resumeData, token) => {
+  try {
+    console.log('Sending update request for resume ID:', resumeId); // Log the ID being sent
+    const response = await axios.put(`${API_URL}/update/${resumeId}`, resumeData, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Error updating resume:', error.response?.data || error.message);
+    throw error;
+  }
 };

@@ -73,3 +73,6 @@ const PersonalDetailsForm = ({ onNext, onPrevious }) => {
 };
 
 export default PersonalDetailsForm;
+
+
+
