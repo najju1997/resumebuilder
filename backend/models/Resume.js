@@ -3,19 +3,19 @@ import mongoose from 'mongoose';
 const ResumeSchema = new mongoose.Schema({
   userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
   personalDetails: {
-    firstName: String,
-    lastName: String,
-    profilePhoto: String,
+    firstName: { type: String, default: '' }, // Always save an empty string if not provided
+    lastName: { type: String, default: '' },
+    profilePhoto: { type: String, default: '' },
   },
   contactInformation: {
-    email: String,
-    phone: String,
-    country: String,
-    city: String,
-    address: String,
-    postalCode: String,
+    email: { type: String, default: '' },
+    phone: { type: String, default: '' },
+    country: { type: String, default: '' },
+    city: { type: String, default: '' },
+    address: { type: String, default: '' },
+    postalCode: { type: String, default: '' },
   },
-  professionalSummary: String,
+  professionalSummary: { type: String, default: '' },
   employmentHistory: [
     {
       jobTitle: String,
