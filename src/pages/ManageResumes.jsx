@@ -30,17 +30,25 @@ const ManageResumes = () => {
 
   // Handle deleting a resume
   const handleDelete = (id) => {
+    console.log("Attempting to delete resume with ID:", id); 
     dispatch(removeResume({ id, token }));
   };
 
   // Handle renaming a resume
+  // Handle renaming a resume
   const handleRename = (id) => {
     if (newName.trim()) {
-      dispatch(updateResumeName({ id, name: newName, token }));
+      console.log('manageResume resumeid:', id, newName);
+      // Dispatch the updateResumeName action with the correct resumeId
+      dispatch(updateResumeName({ id, newName, token }));
+
+      // Clear the editNameId and newName after renaming
       setEditNameId(null);
       setNewName('');
     }
   };
+  
+  
 
   // Handle starting a new resume
   const handleStartNew = async () => {
@@ -75,7 +83,10 @@ const ManageResumes = () => {
         {resumes.map((resume) => (
           <div key={resume._id} className="resume-item border p-4 mb-4 rounded-md">
             <div className="flex justify-between">
-              <h2 className="text-xl font-semibold">{resume.personalDetails?.firstName || 'Untitled Resume'}</h2>
+              <h2 className="text-xl font-semibold">
+                {resume.resumeName || 'Untitled Resume'}
+              </h2>
+
               <div>
                 <button onClick={() => setEditNameId(resume._id)} className="bg-yellow-500 text-white py-2 px-4 rounded-md mr-2">
                   Rename

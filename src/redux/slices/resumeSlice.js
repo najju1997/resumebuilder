@@ -1,5 +1,6 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import { getResumeById, saveResume, updateResume } from '../../api/resumeapi'; // Ensure getResumeById exists
+import debounce from 'lodash/debounce'; // Using lodash debounce
 
 // Thunk to fetch a resume by ID
 export const fetchResume = createAsyncThunk(
@@ -11,7 +12,8 @@ export const fetchResume = createAsyncThunk(
 );
 
 const initialState = {
-  resumeId: null, // Store the resumeId
+  resumeId: null,
+  resumeName: '', // Store the resumeId
   personalDetails: {
     firstName: '',
     lastName: '',
@@ -36,6 +38,43 @@ const initialState = {
   websiteLinks: [],
 };
 
+// Helper function to convert state into a plain object
+const convertStateToObject = (state) => {
+  return {
+    resumeId: state.resumeId,
+    resumeName: state.resumeName,
+    personalDetails: { ...state.personalDetails },
+    contactInformation: { ...state.contactInformation },
+    professionalSummary: state.professionalSummary,
+    employmentHistory: [...state.employmentHistory],
+    skills: [...state.skills],
+    education: [...state.education],
+    internships: [...state.internships],
+    courses: [...state.courses],
+    projects: [...state.projects],
+    references: [...state.references],
+    websiteLinks: [...state.websiteLinks],
+  };
+};
+
+// Debounced save function (500ms delay)
+const debouncedSave = debounce(async (resumeData) => {
+  try {
+    const token = localStorage.getItem('token');
+    if (!token) throw new Error('No token found');
+
+    if (resumeData.resumeId) {
+      await updateResume(resumeData.resumeId, resumeData, token);
+    } else {
+      const newResume = await saveResume(resumeData, token);
+      resumeData.resumeId = newResume._id; // Set the resumeId once created
+    }
+    console.log('Resume saved to backend');
+  } catch (error) {
+    console.error('Error saving resume data:', error.message || error);
+  }
+}, 2000); // Save after a 500ms pause from the last change
+
 const resumeSlice = createSlice({
   name: 'resume',
   initialState,
@@ -45,119 +84,157 @@ const resumeSlice = createSlice({
     },
     setPersonalDetails(state, action) {
       state.personalDetails = action.payload;
-      saveResumeToBackend(state);
+
+      // Set resumeName as firstName initially if resumeName has not been changed manually
+      if (!state.resumeName || state.resumeName === state.personalDetails.firstName) {
+        state.resumeName = action.payload.firstName || 'Untitled Resume';
+      }
+
+      const plainState = convertStateToObject(state); // Convert state to a plain object
+      debouncedSave(plainState); // Pass the plain object to debouncedSave
+    },
+    setResumeName(state, action) {
+      state.resumeName = action.payload; // This allows the user to rename the resume
+      const plainState = convertStateToObject(state); // Convert state to a plain object
+      debouncedSave(plainState); // Pass the plain object to debouncedSave
     },
     setContactInformation(state, action) {
       state.contactInformation = action.payload;
-      saveResumeToBackend(state);
+      const plainState = convertStateToObject(state); // Convert state to a plain object
+      debouncedSave(plainState); // Pass the plain object to debouncedSave
     },
     addEmploymentHistory(state, action) {
       state.employmentHistory.push(action.payload);
-      saveResumeToBackend(state);
+      const plainState = convertStateToObject(state); // Convert state to a plain object
+      debouncedSave(plainState); // Pass the plain object to debouncedSave
     },
     updateEmploymentHistory(state, action) {
       const { index, ...updatedEmployment } = action.payload;
       state.employmentHistory[index] = updatedEmployment;
-      saveResumeToBackend(state);
+      const plainState = convertStateToObject(state); // Convert state to a plain object
+      debouncedSave(plainState); // Pass the plain object to debouncedSave
     },
     removeEmploymentHistory(state, action) {
       state.employmentHistory.splice(action.payload, 1);
-      saveResumeToBackend(state);
+      const plainState = convertStateToObject(state); // Convert state to a plain object
+      debouncedSave(plainState); // Pass the plain object to debouncedSave
     },
     addSkill(state, action) {
       state.skills.push(action.payload);
-      saveResumeToBackend(state);
+      const plainState = convertStateToObject(state); // Convert state to a plain object
+      debouncedSave(plainState); // Pass the plain object to debouncedSave
     },
     updateSkill(state, action) {
       const { index, ...updatedSkill } = action.payload;
       state.skills[index] = updatedSkill;
-      saveResumeToBackend(state);
+      const plainState = convertStateToObject(state); // Convert state to a plain object
+      debouncedSave(plainState); // Pass the plain object to debouncedSave
     },
     removeSkill(state, action) {
       state.skills.splice(action.payload, 1);
-      saveResumeToBackend(state);
+      const plainState = convertStateToObject(state); // Convert state to a plain object
+      debouncedSave(plainState); // Pass the plain object to debouncedSave
     },
     addEducation(state, action) {
       state.education.push(action.payload);
-      saveResumeToBackend(state);
+      const plainState = convertStateToObject(state); // Convert state to a plain object
+      debouncedSave(plainState); // Pass the plain object to debouncedSave
     },
     updateEducation(state, action) {
       const { index, ...updatedEducation } = action.payload;
       state.education[index] = updatedEducation;
-      saveResumeToBackend(state);
+      const plainState = convertStateToObject(state); // Convert state to a plain object
+      debouncedSave(plainState); // Pass the plain object to debouncedSave
     },
     removeEducation(state, action) {
       state.education.splice(action.payload, 1);
-      saveResumeToBackend(state);
+      const plainState = convertStateToObject(state); // Convert state to a plain object
+      debouncedSave(plainState); // Pass the plain object to debouncedSave
     },
     setProfessionalSummary(state, action) {
       state.professionalSummary = action.payload;
-      saveResumeToBackend(state);
+      const plainState = convertStateToObject(state); // Convert state to a plain object
+      debouncedSave(plainState); // Pass the plain object to debouncedSave
     },
     addInternship(state, action) {
       state.internships.push(action.payload);
-      saveResumeToBackend(state);
+      const plainState = convertStateToObject(state); // Convert state to a plain object
+      debouncedSave(plainState); // Pass the plain object to debouncedSave
     },
     updateInternship(state, action) {
       const { index, ...updatedInternship } = action.payload;
       state.internships[index] = updatedInternship;
-      saveResumeToBackend(state);
+      const plainState = convertStateToObject(state); // Convert state to a plain object
+      debouncedSave(plainState); // Pass the plain object to debouncedSave
     },
     removeInternship(state, action) {
       state.internships.splice(action.payload, 1);
-      saveResumeToBackend(state);
+      const plainState = convertStateToObject(state); // Convert state to a plain object
+      debouncedSave(plainState); // Pass the plain object to debouncedSave
     },
     addCourse(state, action) {
       state.courses.push(action.payload);
-      saveResumeToBackend(state);
+      const plainState = convertStateToObject(state); // Convert state to a plain object
+      debouncedSave(plainState); // Pass the plain object to debouncedSave
     },
     updateCourse(state, action) {
       const { index, ...updatedCourse } = action.payload;
       state.courses[index] = updatedCourse;
-      saveResumeToBackend(state);
+      const plainState = convertStateToObject(state); // Convert state to a plain object
+      debouncedSave(plainState); // Pass the plain object to debouncedSave
     },
     removeCourse(state, action) {
       state.courses.splice(action.payload, 1);
-      saveResumeToBackend(state);
+      const plainState = convertStateToObject(state); // Convert state to a plain object
+      debouncedSave(plainState); // Pass the plain object to debouncedSave
     },
     addProject(state, action) {
       state.projects.push(action.payload);
-      saveResumeToBackend(state);
+      const plainState = convertStateToObject(state); // Convert state to a plain object
+      debouncedSave(plainState); // Pass the plain object to debouncedSave
     },
     updateProject(state, action) {
       const { index, ...updatedProject } = action.payload;
       state.projects[index] = updatedProject;
-      saveResumeToBackend(state);
+      const plainState = convertStateToObject(state); // Convert state to a plain object
+      debouncedSave(plainState); // Pass the plain object to debouncedSave
     },
     removeProject(state, action) {
       state.projects.splice(action.payload, 1);
-      saveResumeToBackend(state);
+      const plainState = convertStateToObject(state); // Convert state to a plain object
+      debouncedSave(plainState); // Pass the plain object to debouncedSave
     },
     addReference(state, action) {
       state.references.push(action.payload);
-      saveResumeToBackend(state);
+      const plainState = convertStateToObject(state); // Convert state to a plain object
+      debouncedSave(plainState); // Pass the plain object to debouncedSave
     },
     updateReference(state, action) {
       const { index, ...updatedReference } = action.payload;
       state.references[index] = updatedReference;
-      saveResumeToBackend(state);
+      const plainState = convertStateToObject(state); // Convert state to a plain object
+      debouncedSave(plainState); // Pass the plain object to debouncedSave
     },
     removeReference(state, action) {
       state.references.splice(action.payload, 1);
-      saveResumeToBackend(state);
+      const plainState = convertStateToObject(state); // Convert state to a plain object
+      debouncedSave(plainState); // Pass the plain object to debouncedSave
     },
     addWebsiteLink(state, action) {
       state.websiteLinks.push(action.payload);
-      saveResumeToBackend(state);
+      const plainState = convertStateToObject(state); // Convert state to a plain object
+      debouncedSave(plainState); // Pass the plain object to debouncedSave
     },
     updateWebsiteLink(state, action) {
       const { index, ...updatedLink } = action.payload;
       state.websiteLinks[index] = updatedLink;
-      saveResumeToBackend(state);
+      const plainState = convertStateToObject(state); // Convert state to a plain object
+      debouncedSave(plainState); // Pass the plain object to debouncedSave
     },
     removeWebsiteLink(state, action) {
       state.websiteLinks.splice(action.payload, 1);
-      saveResumeToBackend(state);
+      const plainState = convertStateToObject(state); // Convert state to a plain object
+      debouncedSave(plainState); // Pass the plain object to debouncedSave
     },
     resetResume(state) {
       return initialState;
@@ -165,7 +242,8 @@ const resumeSlice = createSlice({
     updateField(state, action) {
       const { field, value } = action.payload;
       state[field] = value;
-      saveResumeToBackend(state); // Save the updated field to the backend
+      const plainState = convertStateToObject(state); // Convert state to a plain object
+      debouncedSave(plainState); // Save the updated field to the backend
     },
   },
   extraReducers: (builder) => {
@@ -177,28 +255,10 @@ const resumeSlice = createSlice({
   }
 });
 
-// Function to save or update the resume in the backend
-const saveResumeToBackend = async (resumeData) => {
-  try {
-    const token = localStorage.getItem('token');
-    if (!token) throw new Error('No token found');
-
-    // Check if resumeId exists; if so, update the resume
-    if (resumeData.resumeId) {
-      await updateResume(resumeData.resumeId, resumeData, token);
-    } else {
-      // If no resumeId, create a new resume
-      const newResume = await saveResume(resumeData, token);
-      resumeData.resumeId = newResume._id; // Set the resumeId once created
-    }
-  } catch (error) {
-    console.error('Error saving resume data:', error.message || error);
-  }
-};
-
 export const {
-  setResumeId, // Export the setResumeId action
+  setResumeId,
   setPersonalDetails,
+  setResumeName,
   setContactInformation,
   addEmploymentHistory,
   updateEmploymentHistory,

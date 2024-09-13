@@ -13,10 +13,15 @@ export const removeResume = createAsyncThunk('resumes/removeResume', async ({ id
   return id;
 });
 
-export const updateResumeName = createAsyncThunk('resumes/updateResumeName', async ({ id, name, token }) => {
-  const response = await renameResume(id, name, token);
-  return response.data;
-});
+export const updateResumeName = createAsyncThunk(
+  'resumes/updateResumeName',
+  async ({ id, newName, token }) => {
+    console.log('resumeListSlice resumeid:', id, newName); // Change 'name' to 'resumeName'
+    const response = await renameResume(id, newName, token); // Pass resumeName to API
+    return response.data;
+  }
+);
+
 
 export const editResume = createAsyncThunk('resumes/editResume', async ({ id, resumeData, token }) => {
   const response = await updateResume(id, resumeData, token);
@@ -47,10 +52,12 @@ const resumeListSlice = createSlice({
       .addCase(removeResume.fulfilled, (state, action) => {
         state.resumes = state.resumes.filter((resume) => resume._id !== action.payload);
       })
+      // Handle updating the resume name after it's renamed in the backend
       .addCase(updateResumeName.fulfilled, (state, action) => {
-        const index = state.resumes.findIndex((resume) => resume._id === action.payload._id);
+        const updatedResume = action.payload.resume; // The updated resume returned from the backend
+        const index = state.resumes.findIndex((resume) => resume._id === updatedResume._id);
         if (index !== -1) {
-          state.resumes[index].name = action.payload.name;
+          state.resumes[index].resumeName = updatedResume.resumeName; // Update the resumeName in Redux state
         }
       })
       .addCase(editResume.fulfilled, (state, action) => {

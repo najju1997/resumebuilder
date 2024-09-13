@@ -18,7 +18,7 @@ const Signup = () => {
     try {
       const data = await signup({ username, email, password });
       dispatch(setUser(data)); // Store user data in Redux store
-      navigate('/resume-builder'); // Redirect to the resume builder after successful signup
+      navigate('/manage-resumes'); // Redirect to the resume builder after successful signup
     } catch (err) {
       setError(err.message || 'Signup failed');
     }

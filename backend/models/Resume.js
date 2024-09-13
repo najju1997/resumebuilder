@@ -2,6 +2,7 @@ import mongoose from 'mongoose';
 
 const ResumeSchema = new mongoose.Schema({
   userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+  resumeName: { type: String, default: '' },
   personalDetails: {
     firstName: { type: String, default: '' }, // Always save an empty string if not provided
     lastName: { type: String, default: '' },
