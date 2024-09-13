@@ -20,3 +20,12 @@ export const login = async (userData) => {
     throw error.response.data;
   }
 };
+
+export const googleLogin = async (tokenId) => {
+  try {
+    const response = await axios.post(`${API_URL}/google-login`, { tokenId });
+    return response.data; // Returns token and user data
+  } catch (error) {
+    throw error.response.data;
+  }
+};

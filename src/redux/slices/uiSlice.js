@@ -27,6 +27,7 @@ const uiSlice = createSlice({
     logoutUser: (state) => {
       state.user = null;
       localStorage.removeItem('user');
+      localStorage.removeItem('token'); 
     },
     resetState: () => initialState,
   },

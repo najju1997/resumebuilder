@@ -34,9 +34,6 @@ const Navbar = () => {
           </Link>
           {token ? (
             <>
-              <Link to="/resume-builder" className="text-white">
-                Resume Builder
-              </Link>
               <Link to="/manage-resumes" className="text-white">
                 Manage Resumes
               </Link>

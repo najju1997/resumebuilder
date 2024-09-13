@@ -1,7 +1,7 @@
 import mongoose from 'mongoose';
 import bcrypt from 'bcryptjs';
 
-const UserSchema = new mongoose.Schema({
+const userSchema = new mongoose.Schema({
   username: {
     type: String,
     required: true,
@@ -13,12 +13,22 @@ const UserSchema = new mongoose.Schema({
   },
   password: {
     type: String,
-    required: true,
+    required: function() {
+      return !this.googleId; // Password is required only if googleId is not present
+    },
+  },
+  googleId: {
+    type: String,
+    required: false, // Will only be set if the user signs up using Google OAuth
+  },
+  createdAt: {
+    type: Date,
+    default: Date.now,
   },
 });
 
-// Pre-save hook to hash the password before saving the user
-UserSchema.pre('save', async function (next) {
+// Password hashing before saving (only for non-Google users)
+userSchema.pre('save', async function (next) {
   if (!this.isModified('password')) {
     return next();
   }
@@ -28,9 +38,10 @@ UserSchema.pre('save', async function (next) {
   next();
 });
 
-// Method to compare the entered password with the hashed password in the database
-UserSchema.methods.comparePassword = async function (enteredPassword) {
+// Method to compare password
+userSchema.methods.comparePassword = async function (enteredPassword) {
   return await bcrypt.compare(enteredPassword, this.password);
 };
 
-export default mongoose.model('User', UserSchema);
+const User = mongoose.model('User', userSchema);
+export default User;
