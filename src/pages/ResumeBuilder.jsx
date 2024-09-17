@@ -265,6 +265,7 @@ const ResumeBuilder = () => {
           <Sidebar
             onSelectSection={setSelectedSection}
             onDeleteSection={handleDeleteSection}
+            selectedSection={selectedSection}
           />
         </div>
 
