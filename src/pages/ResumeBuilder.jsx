@@ -1,7 +1,14 @@
+// ResumeBuilder.js
+
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
-import { fetchResume, updateField } from '../redux/slices/resumeSlice'; // Import the fetchResume and updateField actions
+import {
+  fetchResume,
+  updateField,
+  addActiveSection,
+  removeActiveSection,
+} from '../redux/slices/resumeSlice';
 import PersonalDetailsForm from '../components/forms/PersonalDetailsForm';
 import ContactInformationForm from '../components/forms/ContactInformationForm';
 import EmploymentHistoryForm from '../components/forms/EmploymentHistoryForm';
@@ -18,12 +25,12 @@ import ResumePreview from '../components/ResumePreview';
 import Sidebar from '../components/common/Sidebar';
 
 const sections = [
-  'personal-details',
-  'contact-information',
-  'employment-history',
-  'skills',
-  'education',
-  'professional-summary'
+  { id: 'personal-details', name: 'Personal Details' },
+  { id: 'contact-information', name: 'Contact Information' },
+  { id: 'employment-history', name: 'Employment History' },
+  { id: 'skills', name: 'Skills' },
+  { id: 'education', name: 'Education' },
+  { id: 'professional-summary', name: 'Professional Summary' },
 ];
 
 const allAdditionalSections = [
@@ -35,17 +42,21 @@ const allAdditionalSections = [
 ];
 
 const ResumeBuilder = () => {
-  const { resumeId } = useParams(); // Get resumeId from URL parameters
-  const dispatch = useDispatch(); // Use dispatch to call actions
-  const navigate = useNavigate(); // For navigation
-  const token = localStorage.getItem('token'); // Get token from localStorage
+  const { resumeId } = useParams();
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+  const token = localStorage.getItem('token');
 
   // Access resume data and status from Redux store
   const resumeData = useSelector((state) => state.resume);
 
+  // Get activeSections and availableAdditionalSections from Redux state
+  const activeSections = useSelector((state) => state.resume.activeSections);
+  const availableAdditionalSections = useSelector(
+    (state) => state.resume.availableAdditionalSections
+  );
+
   const [selectedSection, setSelectedSection] = useState('personal-details');
-  const [activeSections, setActiveSections] = useState([]);
-  const [availableAdditionalSections, setAvailableAdditionalSections] = useState(allAdditionalSections);
 
   useEffect(() => {
     if (resumeId) {
@@ -58,58 +69,86 @@ const ResumeBuilder = () => {
 
   // Handler for updating form inputs
   const handleInputChange = (field, value) => {
-    dispatch(updateField({ field, value })); // Update Redux state and backend
+    dispatch(updateField({ field, value }));
   };
 
   const handleNext = () => {
-    const currentIndex = [...sections, ...activeSections.map(s => s.id)].indexOf(selectedSection);
-    if (currentIndex < [...sections, ...activeSections.map(s => s.id)].length - 1) {
-      setSelectedSection([...sections, ...activeSections.map(s => s.id)][currentIndex + 1]);
+    const allSections = [
+      ...sections.map((s) => s.id),
+      ...activeSections.map((s) => s.id),
+    ];
+    const currentIndex = allSections.indexOf(selectedSection);
+    if (currentIndex < allSections.length - 1) {
+      setSelectedSection(allSections[currentIndex + 1]);
     }
   };
 
   const handlePrevious = () => {
-    const currentIndex = [...sections, ...activeSections.map(s => s.id)].indexOf(selectedSection);
+    const allSections = [
+      ...sections.map((s) => s.id),
+      ...activeSections.map((s) => s.id),
+    ];
+    const currentIndex = allSections.indexOf(selectedSection);
     if (currentIndex > 0) {
-      setSelectedSection([...sections, ...activeSections.map(s => s.id)][currentIndex - 1]);
+      setSelectedSection(allSections[currentIndex - 1]);
     }
   };
 
   const handleAddSection = (newSectionId) => {
-    const sectionToAdd = availableAdditionalSections.find(section => section.id === newSectionId);
+    const sectionToAdd = availableAdditionalSections.find(
+      (section) => section.id === newSectionId
+    );
     if (sectionToAdd) {
-      setActiveSections([...activeSections, sectionToAdd]);
-      setAvailableAdditionalSections(availableAdditionalSections.filter(section => section.id !== newSectionId));
+      dispatch(addActiveSection(sectionToAdd));
       setSelectedSection(newSectionId);
     }
   };
 
   const handleDeleteSection = (sectionId) => {
-    const sectionToRemove = activeSections.find(section => section.id === sectionId);
-    if (sectionToRemove) {
-      setAvailableAdditionalSections([...availableAdditionalSections, sectionToRemove]);
+    // Create a copy of activeSections without the section to be removed
+    const updatedActiveSections = activeSections.filter(
+      (section) => section.id !== sectionId
+    );
   
-      const newActiveSections = activeSections.filter(section => section.id !== sectionId);
-      setActiveSections(newActiveSections);
+    // Dispatch the action to remove the section
+    dispatch(removeActiveSection(sectionId));
   
-      if (newActiveSections.length > 0) {
-        setSelectedSection(newActiveSections[newActiveSections.length - 1].id);
-      } else {
-        setSelectedSection(sections[sections.length - 1]);
-      }
+    // Update selectedSection based on the updated activeSections
+    if (updatedActiveSections.length > 0) {
+      // Set selectedSection to the last item in updatedActiveSections
+      setSelectedSection(updatedActiveSections[updatedActiveSections.length - 1].id);
+    } else {
+      // If no activeSections left, set selectedSection to the last fixed section
+      setSelectedSection(sections[sections.length - 1].id);
     }
   };
+  
+  
 
   const renderForm = () => {
-    const currentIndex = [...sections, ...activeSections.map(s => s.id)].indexOf(selectedSection);
-    const isLastSection = currentIndex === [...sections, ...activeSections.map(s => s.id)].length - 1;
+    const allSections = [
+      ...sections.map((s) => s.id),
+      ...activeSections.map((s) => s.id),
+    ];
+    const currentIndex = allSections.indexOf(selectedSection);
+    const isLastSection = currentIndex === allSections.length - 1;
+
+    const commonProps = {
+      onNext: !isLastSection ? handleNext : undefined,
+      onPrevious: currentIndex > 0 ? handlePrevious : undefined,
+    };
 
     switch (selectedSection) {
       case 'personal-details':
         return (
           <PersonalDetailsForm
             data={resumeData.personalDetails}
-            onChange={(field, value) => handleInputChange('personalDetails', { ...resumeData.personalDetails, [field]: value })}
+            onChange={(field, value) =>
+              handleInputChange('personalDetails', {
+                ...resumeData.personalDetails,
+                [field]: value,
+              })
+            }
             onNext={handleNext}
           />
         );
@@ -117,90 +156,91 @@ const ResumeBuilder = () => {
         return (
           <ContactInformationForm
             data={resumeData.contactInformation}
-            onChange={(field, value) => handleInputChange('contactInformation', { ...resumeData.contactInformation, [field]: value })}
-            onNext={!isLastSection && handleNext}
-            onPrevious={handlePrevious}
+            onChange={(field, value) =>
+              handleInputChange('contactInformation', {
+                ...resumeData.contactInformation,
+                [field]: value,
+              })
+            }
+            {...commonProps}
           />
         );
       case 'employment-history':
         return (
           <EmploymentHistoryForm
             data={resumeData.employmentHistory}
-            onChange={(field, value) => handleInputChange('employmentHistory', { ...resumeData.employmentHistory, [field]: value })}
-            onNext={!isLastSection && handleNext}
-            onPrevious={handlePrevious}
+            onChange={(field, value) =>
+              handleInputChange('employmentHistory', value)
+            }
+            {...commonProps}
           />
         );
       case 'skills':
         return (
           <SkillsForm
             data={resumeData.skills}
-            onChange={(field, value) => handleInputChange('skills', { ...resumeData.skills, [field]: value })}
-            onNext={!isLastSection && handleNext}
-            onPrevious={handlePrevious}
+            onChange={(field, value) => handleInputChange('skills', value)}
+            {...commonProps}
           />
         );
       case 'education':
         return (
           <EducationForm
             data={resumeData.education}
-            onChange={(field, value) => handleInputChange('education', { ...resumeData.education, [field]: value })}
-            onNext={!isLastSection && handleNext}
-            onPrevious={handlePrevious}
+            onChange={(field, value) => handleInputChange('education', value)}
+            {...commonProps}
           />
         );
       case 'professional-summary':
         return (
           <ProfessionalSummaryForm
             data={resumeData.professionalSummary}
-            onChange={(field, value) => handleInputChange('professionalSummary', value)}
-            onNext={!isLastSection && handleNext}
-            onPrevious={handlePrevious}
+            onChange={(value) => handleInputChange('professionalSummary', value)}
+            {...commonProps}
           />
         );
       case 'internships':
         return (
           <InternshipForm
             data={resumeData.internships}
-            onChange={(field, value) => handleInputChange('internships', { ...resumeData.internships, [field]: value })}
-            onNext={!isLastSection && handleNext}
-            onPrevious={handlePrevious}
+            onChange={(field, value) =>
+              handleInputChange('internships', value)
+            }
+            {...commonProps}
           />
         );
       case 'courses':
         return (
           <CoursesForm
             data={resumeData.courses}
-            onChange={(field, value) => handleInputChange('courses', { ...resumeData.courses, [field]: value })}
-            onNext={!isLastSection && handleNext}
-            onPrevious={handlePrevious}
+            onChange={(field, value) => handleInputChange('courses', value)}
+            {...commonProps}
           />
         );
       case 'projects':
         return (
           <ProjectsForm
             data={resumeData.projects}
-            onChange={(field, value) => handleInputChange('projects', { ...resumeData.projects, [field]: value })}
-            onNext={!isLastSection && handleNext}
-            onPrevious={handlePrevious}
+            onChange={(field, value) => handleInputChange('projects', value)}
+            {...commonProps}
           />
         );
       case 'references':
         return (
           <ReferencesForm
             data={resumeData.references}
-            onChange={(field, value) => handleInputChange('references', { ...resumeData.references, [field]: value })}
-            onNext={!isLastSection && handleNext}
-            onPrevious={handlePrevious}
+            onChange={(field, value) => handleInputChange('references', value)}
+            {...commonProps}
           />
         );
       case 'website-links':
         return (
           <WebsiteLinksForm
             data={resumeData.websiteLinks}
-            onChange={(field, value) => handleInputChange('websiteLinks', { ...resumeData.websiteLinks, [field]: value })}
-            onNext={!isLastSection && handleNext}
-            onPrevious={handlePrevious}
+            onChange={(field, value) =>
+              handleInputChange('websiteLinks', value)
+            }
+            {...commonProps}
           />
         );
       case 'additional-section':
@@ -224,7 +264,6 @@ const ResumeBuilder = () => {
         <div className="w-1/5 bg-gray-200 overflow-y-auto text-sm">
           <Sidebar
             onSelectSection={setSelectedSection}
-            activeSections={activeSections}
             onDeleteSection={handleDeleteSection}
           />
         </div>
@@ -238,7 +277,7 @@ const ResumeBuilder = () => {
 
       {/* Preview Section */}
       <div className="flex w-3/5 h-full bg-gray-100 justify-center items-start">
-        <ResumePreview data={resumeData} /> {/* Pass the data to the preview */}
+        <ResumePreview data={resumeData} />
       </div>
     </div>
   );

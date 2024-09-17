@@ -86,6 +86,7 @@ const ResumeSchema = new mongoose.Schema({
       url: String,
     },
   ],
+  activeSections: [],
 });
 
 export default mongoose.model('Resume', ResumeSchema);
