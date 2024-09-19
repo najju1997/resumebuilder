@@ -21,12 +21,19 @@ const EmploymentHistoryForm = ({ onNext, onPrevious }) => {
     };
     dispatch(updateEmploymentHistory({ index, ...updatedJob }));
   };
-
   const handleChange = (e, index) => {
     const { name, value } = e.target;
-    const updatedJob = { ...employmentHistory[index], [name]: value };
+  
+    // Properly handle experiencePoints as an array of strings
+    const updatedJob = {
+      ...employmentHistory[index],
+      [name]: name === 'experiencePoints' ? value.split('\n') : value, // Split by new lines when updating experiencePoints
+    };
+  
+    // Dispatch the update to Redux store
     dispatch(updateEmploymentHistory({ index, ...updatedJob }));
   };
+  
 
   const handleDeleteJob = (index) => {
     dispatch(removeEmploymentHistory(index));
@@ -129,12 +136,11 @@ const EmploymentHistoryForm = ({ onNext, onPrevious }) => {
                 <div className="mb-4">
                   <label htmlFor="experiencePoints" className="block text-sm font-medium text-gray-700">Experience Bullet Points</label>
                   <textarea
-                    id="experiencePoints"
                     name="experiencePoints"
-                    value={job.experiencePoints}
-                    placeholder="Describe your role and achievements"
+                    value={Array.isArray(job.experiencePoints) ? job.experiencePoints.join('\n') : ''}
                     onChange={(e) => handleChange(e, index)}
-                    className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
+                    placeholder="Enter bullet points, one per line"
+                    rows={5}
                   />
                 </div>
               </form>

@@ -45,7 +45,7 @@ const Template1 = () => {
               <p className="text-sm">{job.startDate} - {job.endDate}</p>
               {job.experiencePoints && (
                 <ul className="list-disc list-inside">
-                  {job.experiencePoints.split('\n').map((point, idx) => (
+                  {Array.isArray(job.experiencePoints) && job.experiencePoints.map((point, idx) => (
                     <li key={idx} className="text-sm">{point}</li>
                   ))}
                 </ul>

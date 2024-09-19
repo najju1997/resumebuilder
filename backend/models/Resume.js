@@ -24,7 +24,7 @@ const ResumeSchema = new mongoose.Schema({
       startDate: String,
       endDate: String,
       location: String,
-      experiencePoints: String,
+      experiencePoints: [String],
       currentlyWorking: Boolean,
     },
   ],
