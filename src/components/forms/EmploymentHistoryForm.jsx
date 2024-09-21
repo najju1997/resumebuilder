@@ -1,13 +1,20 @@
 import { useState, useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { addEmploymentHistory, updateEmploymentHistory, removeEmploymentHistory } from '../../redux/slices/resumeSlice';
+import { getAISuggestions } from '../../api/resumeapi';
 import DateRangeInput from '../common/DateRangeInput';
+import { useParams } from 'react-router-dom';
+import { FaPlus, FaCheck,FaSpinner } from 'react-icons/fa'; // For + and check icons
 
 const EmploymentHistoryForm = ({ onNext, onPrevious }) => {
   const dispatch = useDispatch();
   const employmentHistory = useSelector((state) => state.resume.employmentHistory);
-
+  const { resumeId } = useParams();
+  const [loading, setLoading] = useState(false);
   const [expandedIndex, setExpandedIndex] = useState(null);
+  const [aiSuggestions, setAiSuggestions] = useState([]);
+  const [selectedJobIndex, setSelectedJobIndex] = useState(null);
+  const [selectedSuggestions, setSelectedSuggestions] = useState({}); // Track selected AI suggestions
 
   useEffect(() => {
     setExpandedIndex(null); // Collapse all sections when the form is loaded or refreshed
@@ -21,19 +28,51 @@ const EmploymentHistoryForm = ({ onNext, onPrevious }) => {
     };
     dispatch(updateEmploymentHistory({ index, ...updatedJob }));
   };
+
   const handleChange = (e, index) => {
     const { name, value } = e.target;
-  
-    // Properly handle experiencePoints as an array of strings
     const updatedJob = {
       ...employmentHistory[index],
       [name]: name === 'experiencePoints' ? value.split('\n') : value, // Split by new lines when updating experiencePoints
     };
-  
-    // Dispatch the update to Redux store
     dispatch(updateEmploymentHistory({ index, ...updatedJob }));
   };
-  
+
+const handleAIMagicClick = async (jobIndex) => {
+  setLoading(true);  // Set loading to true
+  try {
+    const suggestions = await getAISuggestions(resumeId, jobIndex);
+    setAiSuggestions(suggestions); // Store the suggestions in state
+    setSelectedJobIndex(jobIndex); // Track the job where AI Magic was clicked
+  } catch (error) {
+    console.error('Error fetching AI suggestions:', error);
+  } finally {
+    setLoading(false);  // Set loading to false after request completes
+  }
+};
+
+
+  const toggleAISuggestion = (suggestion, jobIndex) => {
+    const job = employmentHistory[jobIndex];
+    let updatedExperiencePoints;
+
+    // If the suggestion is already in the experience points, remove it
+    if (job.experiencePoints.includes(suggestion)) {
+      updatedExperiencePoints = job.experiencePoints.filter((point) => point !== suggestion);
+      setSelectedSuggestions((prev) => ({ ...prev, [suggestion]: false }));
+    } else {
+      // Otherwise, add the suggestion to experience points
+      updatedExperiencePoints = [...job.experiencePoints, suggestion];
+      setSelectedSuggestions((prev) => ({ ...prev, [suggestion]: true }));
+    }
+
+    // Update the Redux state with the new experience points
+    const updatedJob = {
+      ...job,
+      experiencePoints: updatedExperiencePoints,
+    };
+    dispatch(updateEmploymentHistory({ index: jobIndex, ...updatedJob }));
+  };
 
   const handleDeleteJob = (index) => {
     dispatch(removeEmploymentHistory(index));
@@ -46,9 +85,11 @@ const EmploymentHistoryForm = ({ onNext, onPrevious }) => {
     dispatch(addEmploymentHistory({
       jobTitle: '',
       company: '',
+      jobField: '',  // Keep jobField intact
       startDate: '',
       endDate: '',
       location: '',
+      experiencePoints: [],
       currentlyWorking: false,
     }));
     setExpandedIndex(employmentHistory.length);
@@ -115,6 +156,18 @@ const EmploymentHistoryForm = ({ onNext, onPrevious }) => {
                     className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
                   />
                 </div>
+                <div className="mb-4">
+                  <label htmlFor="jobField" className="block text-sm font-medium text-gray-700">Job Field</label>
+                  <input
+                    type="text"
+                    id="jobField"
+                    name="jobField"
+                    value={job.jobField || ''}  // Bind value to jobField
+                    placeholder="Enter the field of your job (e.g., Marketing, Engineering)"
+                    onChange={(e) => handleChange(e, index)}
+                    className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
+                  />
+                </div>
                 <DateRangeInput
                   startDate={job.startDate}
                   endDate={job.endDate}
@@ -133,6 +186,7 @@ const EmploymentHistoryForm = ({ onNext, onPrevious }) => {
                     className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
                   />
                 </div>
+
                 <div className="mb-4">
                   <label htmlFor="experiencePoints" className="block text-sm font-medium text-gray-700">Experience Bullet Points</label>
                   <textarea
@@ -140,9 +194,44 @@ const EmploymentHistoryForm = ({ onNext, onPrevious }) => {
                     value={Array.isArray(job.experiencePoints) ? job.experiencePoints.join('\n') : ''}
                     onChange={(e) => handleChange(e, index)}
                     placeholder="Enter bullet points, one per line"
-                    rows={5}
+                    rows={10}  // Increase the height of the textarea
+                    className="block w-full border border-gray-300 rounded-md shadow-sm p-2"
                   />
                 </div>
+
+                {/* AI Magic Button */}
+                <button
+                  type="button"
+                  onClick={() => handleAIMagicClick(index)}
+                  className="bg-purple-500 text-white py-2 px-4 rounded-md mb-4 hover:bg-purple-600 transition duration-300 flex items-center justify-center"
+                  disabled={loading}  // Disable the button while loading
+                >
+                  {loading ? (
+                    <FaSpinner className="animate-spin mr-2" />  // Show spinner while loading
+                  ) : (
+                    'AI Magic'  // Default button text
+                  )}
+                </button>
+
+
+                {/* Display AI Suggestions if this job's AI Magic button was clicked */}
+                {selectedJobIndex === index && aiSuggestions.length > 0 && (
+                  <div className="ai-suggestions border border-gray-300 rounded-md p-4">
+                    <h4 className="text-lg font-semibold mb-2">AI Suggestions</h4>
+                    {aiSuggestions.map((suggestion, idx) => (
+                      <div key={idx} className="flex justify-between items-center mb-2">
+                        <p className="text-gray-700">{suggestion}</p>
+                        <button
+                          type="button"
+                          onClick={() => toggleAISuggestion(suggestion, index)}
+                          className="text-green-500 hover:text-green-700 transition duration-300"
+                        >
+                          {selectedSuggestions[suggestion] ? <FaCheck /> : <FaPlus />}
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </form>
             </div>
           )}

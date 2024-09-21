@@ -9,6 +9,7 @@ import {
   getResumeById,
 } from '../controllers/resumeController.js';
 import authMiddleware from '../middleware/authMiddleware.js';
+import { suggestExperienceWithAI } from '../controllers/AIController.js';
 
 const router = express.Router();
 
@@ -32,4 +33,9 @@ router.put('/rename/:id', authMiddleware, renameResume);
 // Route to update a specific resume
 router.put('/update/:id', authMiddleware, updateResume);
 
+// Route to handle AI suggestion for a specific job in a resume
+router.post('/ai/suggest/:resumeId/:jobIndex', suggestExperienceWithAI);
+
 export default router;
+
+

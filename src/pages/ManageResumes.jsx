@@ -35,7 +35,6 @@ const ManageResumes = () => {
   };
 
   // Handle renaming a resume
-  // Handle renaming a resume
   const handleRename = (id) => {
     if (newName.trim()) {
       console.log('manageResume resumeid:', id, newName);

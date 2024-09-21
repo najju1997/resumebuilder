@@ -93,3 +93,14 @@ export const updateResume = async (resumeId, resumeData, token) => {
     throw error;
   }
 };
+
+export const getAISuggestions = async (resumeId, jobIndex) => {
+  try {
+    console.log('AI resume ID:', resumeId, jobIndex);
+    const response = await api.post(`/resume/ai/suggest/${resumeId}/${jobIndex}`);
+    return response.data.aiSuggestions;  // Return the AI-generated suggestions
+  } catch (error) {
+    console.error('Error fetching AI suggestions:', error);
+    throw error;
+  }
+};

@@ -21,10 +21,12 @@ const ResumeSchema = new mongoose.Schema({
     {
       jobTitle: String,
       company: String,
+      jobField: String,
       startDate: String,
       endDate: String,
       location: String,
       experiencePoints: [String],
+      aiexperiencePoints: [String],
       currentlyWorking: Boolean,
     },
   ],
