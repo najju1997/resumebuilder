@@ -4,7 +4,7 @@ import { addEmploymentHistory, updateEmploymentHistory, removeEmploymentHistory 
 import { getAISuggestions } from '../../api/resumeapi';
 import DateRangeInput from '../common/DateRangeInput';
 import { useParams } from 'react-router-dom';
-import { FaPlus, FaCheck,FaSpinner } from 'react-icons/fa'; // For + and check icons
+import { FaPlus, FaCheck, FaSpinner } from 'react-icons/fa'; // For icons
 
 const EmploymentHistoryForm = ({ onNext, onPrevious }) => {
   const dispatch = useDispatch();
@@ -15,6 +15,7 @@ const EmploymentHistoryForm = ({ onNext, onPrevious }) => {
   const [aiSuggestions, setAiSuggestions] = useState([]);
   const [selectedJobIndex, setSelectedJobIndex] = useState(null);
   const [selectedSuggestions, setSelectedSuggestions] = useState({}); // Track selected AI suggestions
+  const [Error, setError] = useState(''); // Track validation errors
 
   useEffect(() => {
     setExpandedIndex(null); // Collapse all sections when the form is loaded or refreshed
@@ -38,19 +39,33 @@ const EmploymentHistoryForm = ({ onNext, onPrevious }) => {
     dispatch(updateEmploymentHistory({ index, ...updatedJob }));
   };
 
-const handleAIMagicClick = async (jobIndex) => {
-  setLoading(true);  // Set loading to true
-  try {
-    const suggestions = await getAISuggestions(resumeId, jobIndex);
-    setAiSuggestions(suggestions); // Store the suggestions in state
-    setSelectedJobIndex(jobIndex); // Track the job where AI Magic was clicked
-  } catch (error) {
-    console.error('Error fetching AI suggestions:', error);
-  } finally {
-    setLoading(false);  // Set loading to false after request completes
-  }
-};
+  // Validation for AI Magic Button
+  const isValidForAIMagic = (job) => {
+    return job.jobTitle && job.jobField
+  };
 
+  // Function to handle the "AI Magic" button click
+  const handleAIMagicClick = async (jobIndex) => {
+    const job = employmentHistory[jobIndex];
+
+    // Validate Job Title, Job Field, and Experience Points
+    if (!isValidForAIMagic(job)) {
+      return;
+    }
+
+    setLoading(true); // Start loading
+    setError('');  // Clear any previous validation errors
+    try {
+      const suggestions = await getAISuggestions(resumeId, jobIndex);
+      setAiSuggestions(suggestions); // Store the suggestions in state
+      setSelectedJobIndex(jobIndex); // Track the job where AI Magic was clicked
+    } catch (error) {
+      setError('Error generating Bullet Points. Refresh the page.')
+      console.error('Error fetching AI suggestions:', error);
+    } finally {
+      setLoading(false); // Stop loading
+    }
+  };
 
   const toggleAISuggestion = (suggestion, jobIndex) => {
     const job = employmentHistory[jobIndex];
@@ -76,6 +91,7 @@ const handleAIMagicClick = async (jobIndex) => {
 
   const handleDeleteJob = (index) => {
     dispatch(removeEmploymentHistory(index));
+    setAiSuggestions([]);
     if (expandedIndex === index) {
       setExpandedIndex(null);
     }
@@ -203,8 +219,9 @@ const handleAIMagicClick = async (jobIndex) => {
                 <button
                   type="button"
                   onClick={() => handleAIMagicClick(index)}
-                  className="bg-purple-500 text-white py-2 px-4 rounded-md mb-4 hover:bg-purple-600 transition duration-300 flex items-center justify-center"
-                  disabled={loading}  // Disable the button while loading
+                  className={`bg-purple-500 text-white py-2 px-4 rounded-md mb-4 hover:bg-purple-600 transition duration-300 flex items-center justify-center ${
+                    loading || !isValidForAIMagic(job) ? 'opacity-50 cursor-not-allowed' : ''
+                  }`}
                 >
                   {loading ? (
                     <FaSpinner className="animate-spin mr-2" />  // Show spinner while loading
@@ -213,6 +230,17 @@ const handleAIMagicClick = async (jobIndex) => {
                   )}
                 </button>
 
+                {/* Display validation message if requirements are not met */}
+                {!isValidForAIMagic(job) && (
+                  <p className="text-sm text-red-500 mt-2">
+                    Ops! Fill Job Title and Job Field.
+                  </p>
+                )}
+
+                {/* Show validation error if present */}
+                {Error && (
+                  <p className="text-sm text-red-500 mt-2">{Error}</p>
+                )}
 
                 {/* Display AI Suggestions if this job's AI Magic button was clicked */}
                 {selectedJobIndex === index && aiSuggestions.length > 0 && (

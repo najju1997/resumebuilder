@@ -12,9 +12,7 @@ console.log('Loaded API Key:', apiKey);
 // Function to handle AI suggestion request for a specific job
 export const suggestExperienceWithAI = async (req, res) => {
     try {
-        console.log('req.params:', req.params);
         const { resumeId, jobIndex } = req.params;  // Get resume ID and job index from request params
-        console.log('AI backend resume ID:', resumeId);
         
         // Fetch resume from the database using resumeID
         const resume = await Resume.findById(resumeId);
@@ -89,3 +87,58 @@ export const suggestExperienceWithAI = async (req, res) => {
         return res.status(500).json({ message: 'Server error', error: error.message });
     }
 };
+
+
+// Function to generate AI-powered professional summary
+export const generateProfessionalSummary = async (req, res) => {
+    try {
+        const { resumeId } = req.params;  // Get resume ID from request params
+
+        console.log('AI backend summary resume ID:', resumeId);
+
+        // Fetch the resume from the database (you may need to modify this based on your DB setup)
+        const resume = await Resume.findById(resumeId);
+        if (!resume) {
+            return res.status(404).json({ message: 'Resume not found' });
+        }
+
+        // Prepare prompt using relevant details for generating a professional summary
+        const prompt = `Generate a professional summary based on the following details:
+        Job Title: ${resume.employmentHistory[0].jobTitle || 'N/A'}
+        Job Field: ${resume.employmentHistory[0].jobField || 'N/A'}
+        Experience Bullet Points: 
+        ${resume.employmentHistory[0].experiencePoints.join('\n') || 'No experience points provided.'}`;
+        
+
+        // Make a request to OpenAI to generate the summary
+        const response = await axios.post(
+            'https://api.openai.com/v1/chat/completions',
+            {
+                model: 'gpt-3.5-turbo',  // You can use 'gpt-4' if available
+                messages: [
+                    { role: 'system', content: 'You are a helpful assistant.' },
+                    { role: 'user', content: prompt }
+                ],
+                max_tokens: 150,  // Adjust token limit based on your requirement
+                temperature: 0.7,  // Controls the creativity of the response
+            },
+            {
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${apiKey}`  // Make sure the API key is properly set
+                }
+            }
+        );
+
+        // Get the generated summary from the response
+        const aiSummary = response.data.choices[0].message.content;
+
+        // Return the AI-generated professional summary
+        res.status(200).json({ professionalSummary: aiSummary });
+
+    } catch (error) {
+        console.error('Error generating professional summary:', error.message);
+        return res.status(500).json({ message: 'Server error', error: error.message });
+    }
+};
+

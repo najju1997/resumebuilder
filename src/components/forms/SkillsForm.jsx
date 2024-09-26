@@ -20,8 +20,7 @@ const SkillsForm = ({ onNext, onPrevious }) => {
 
   const handleAddSkill = () => {
     dispatch(addSkill({
-      skill: '',
-      level: 3, // Default level
+      skill: ''
     }));
     setExpandedIndex(skills.length);
   };
@@ -81,20 +80,6 @@ const SkillsForm = ({ onNext, onPrevious }) => {
                     onChange={(e) => handleChange(e, index)}
                     className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
                   />
-                </div>
-                <div className="mb-4">
-                  <label htmlFor="level" className="block text-sm font-medium text-gray-700">Level</label>
-                  <input
-                    type="range"
-                    id="level"
-                    name="level"
-                    min="1"
-                    max="5"
-                    value={skill.level}
-                    onChange={(e) => handleChange(e, index)}
-                    className="mt-1 block w-full"
-                  />
-                  <span>{skill.level} out of 5</span>
                 </div>
               </form>
             </div>

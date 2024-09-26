@@ -94,6 +94,7 @@ export const updateResume = async (resumeId, resumeData, token) => {
   }
 };
 
+// AI suggestions for experience points
 export const getAISuggestions = async (resumeId, jobIndex) => {
   try {
     console.log('AI resume ID:', resumeId, jobIndex);
@@ -101,6 +102,18 @@ export const getAISuggestions = async (resumeId, jobIndex) => {
     return response.data.aiSuggestions;  // Return the AI-generated suggestions
   } catch (error) {
     console.error('Error fetching AI suggestions:', error);
+    throw error;
+  }
+};
+
+// Function to fetch AI-generated professional summary
+export const generateAISummary = async (resumeId) => {
+  try {
+    console.log('AI summary resume ID:', resumeId);
+    const response = await api.post(`/resume/ai/professional-summary/${resumeId}`);
+    return response.data.professionalSummary;  // Return the AI-generated professional summary
+  } catch (error) {
+    console.error('Error generating professional summary:', error);
     throw error;
   }
 };
