@@ -4,7 +4,8 @@ import { addEmploymentHistory, updateEmploymentHistory, removeEmploymentHistory 
 import { getAISuggestions } from '../../api/resumeapi';
 import DateRangeInput from '../common/DateRangeInput';
 import { useParams } from 'react-router-dom';
-import { FaPlus, FaCheck, FaSpinner } from 'react-icons/fa'; // For icons
+import { FaPlus, FaCheck, FaSpinner,FaSyncAlt, FaMagic } from 'react-icons/fa'; // For icons
+import DeletePopup from '../common/DeletePopup'; // Import the DeletePopup
 
 const EmploymentHistoryForm = ({ onNext, onPrevious }) => {
   const dispatch = useDispatch();
@@ -16,6 +17,9 @@ const EmploymentHistoryForm = ({ onNext, onPrevious }) => {
   const [selectedJobIndex, setSelectedJobIndex] = useState(null);
   const [selectedSuggestions, setSelectedSuggestions] = useState({}); // Track selected AI suggestions
   const [Error, setError] = useState(''); // Track validation errors
+  const [showPopup, setShowPopup] = useState(false); // Track popup visibility
+  const [deleteIndex, setDeleteIndex] = useState(null); // Track index of the hobby to delete
+  const token = localStorage.getItem('token');
 
   useEffect(() => {
     setExpandedIndex(null); // Collapse all sections when the form is loaded or refreshed
@@ -56,7 +60,7 @@ const EmploymentHistoryForm = ({ onNext, onPrevious }) => {
     setLoading(true); // Start loading
     setError('');  // Clear any previous validation errors
     try {
-      const suggestions = await getAISuggestions(resumeId, jobIndex);
+      const suggestions = await getAISuggestions(resumeId, jobIndex, token);
       setAiSuggestions(suggestions); // Store the suggestions in state
       setSelectedJobIndex(jobIndex); // Track the job where AI Magic was clicked
     } catch (error) {
@@ -89,12 +93,32 @@ const EmploymentHistoryForm = ({ onNext, onPrevious }) => {
     dispatch(updateEmploymentHistory({ index: jobIndex, ...updatedJob }));
   };
 
-  const handleDeleteJob = (index) => {
-    dispatch(removeEmploymentHistory(index));
-    setAiSuggestions([]);
-    if (expandedIndex === index) {
-      setExpandedIndex(null);
+  const handleDeleteJob = (index, job) => {
+    // Check if the job is valid for AI Magic
+    if (!isValidForAIMagic(job)) {
+      // Directly delete the job without showing the popup
+      dispatch(removeEmploymentHistory(index)); 
+      setAiSuggestions([]); // Clear AI suggestions after deletion
+      if (expandedIndex === index) {
+        setExpandedIndex(null); // Collapse the section if it's expanded
+      }
+    } else {
+      // If valid, show the confirmation pop-up
+      setDeleteIndex(index); // Set the index of the job to delete
+      setShowPopup(true);    // Show the confirmation pop-up
+      setAiSuggestions([]);  // Clear AI suggestions
+      // if (expandedIndex === index) {
+      //   setExpandedIndex(null); // Collapse the section if it's expanded
+      // }
     }
+  };
+  
+
+  const handleDeleteConfirmation = (choice) => {
+    if (choice === 'yes') {
+      dispatch(removeEmploymentHistory(deleteIndex)); // Remove hobby if "Yes" is confirmed
+    }
+    setShowPopup(false); // Hide the pop-up regardless of the choice
   };
 
   const handleAddMoreClick = () => {
@@ -132,7 +156,7 @@ const EmploymentHistoryForm = ({ onNext, onPrevious }) => {
               <button
                 onClick={(e) => {
                   e.stopPropagation();
-                  handleDeleteJob(index);
+                  handleDeleteJob(index, job);
                 }}
                 className="text-red-500 mr-4"
               >
@@ -215,20 +239,30 @@ const EmploymentHistoryForm = ({ onNext, onPrevious }) => {
                   />
                 </div>
 
-                {/* AI Magic Button */}
+                {/* AI Magic / Refresh Button */}
+                {/* AI Magic / Refresh Button */}
                 <button
                   type="button"
                   onClick={() => handleAIMagicClick(index)}
-                  className={`bg-purple-500 text-white py-2 px-4 rounded-md mb-4 hover:bg-purple-600 transition duration-300 flex items-center justify-center ${
+                  className={`${
+                    aiSuggestions.length > 0 ? 'bg-blue-500 hover:bg-blue-600' : 'bg-purple-500 hover:bg-purple-600'
+                  } text-white py-2 px-4 rounded-md mb-4 transition duration-300 flex items-center justify-center ${
                     loading || !isValidForAIMagic(job) ? 'opacity-50 cursor-not-allowed' : ''
                   }`}
+                  disabled={loading || !isValidForAIMagic(job)}  // Disable button while loading or invalid job
                 >
                   {loading ? (
                     <FaSpinner className="animate-spin mr-2" />  // Show spinner while loading
                   ) : (
-                    'AI Magic'  // Default button text
+                    aiSuggestions.length > 0 ? (
+                      <FaSyncAlt className="mr-2" />  // Show Refresh icon if suggestions exist
+                    ) : (
+                      <FaMagic className="mr-2" />  // Show Magic wand icon when no suggestions yet
+                    )
                   )}
+                  {loading ? 'Loading...' : aiSuggestions.length > 0 ? 'Refresh' : 'AI Magic'}
                 </button>
+
 
                 {/* Display validation message if requirements are not met */}
                 {!isValidForAIMagic(job) && (
@@ -273,6 +307,9 @@ const EmploymentHistoryForm = ({ onNext, onPrevious }) => {
         <button onClick={onPrevious} className="bg-gray-500 text-white py-2 px-4 rounded-md">Previous</button>
         {onNext && <button onClick={onNext} className="bg-blue-500 text-white py-2 px-4 rounded-md">Next</button>}
       </div>
+
+      {/* Render DeletePopup only when showPopup is true */}
+      {showPopup && <DeletePopup onConfirm={handleDeleteConfirmation} />}
     </div>
   );
 };

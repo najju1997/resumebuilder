@@ -33,7 +33,6 @@ const ResumeSchema = new mongoose.Schema({
   skills: [
     {
       skill: String,
-      level: Number, // e.g., 1-5
     },
   ],
   education: [
@@ -74,6 +73,12 @@ const ResumeSchema = new mongoose.Schema({
       currentlyWorking: Boolean,
     },
   ],
+  languages: [
+    {
+      language: String,
+      proficiency: String,
+    },
+  ],
   references: [
     {
       referentName: String,
@@ -86,6 +91,11 @@ const ResumeSchema = new mongoose.Schema({
     {
       linkTitle: String,
       url: String,
+    },
+  ],
+  hobbies: [
+    {
+      hobby: String,
     },
   ],
   activeSections: [],

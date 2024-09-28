@@ -61,7 +61,7 @@ const Template1 = () => {
           <h2 className="text-2xl font-semibold">Skills</h2>
           <ul className="list-disc list-inside">
             {skills.map((skill, index) => (
-              <li key={index} className="text-sm">{skill.skill} ({skill.level} out of 5)</li>
+              <li key={index} className="text-sm">{skill.skill}</li>
             ))}
           </ul>
         </div>

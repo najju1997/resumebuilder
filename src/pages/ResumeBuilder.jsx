@@ -1,14 +1,9 @@
 // ResumeBuilder.js
 
 import { useEffect, useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
-import {
-  fetchResume,
-  updateField,
-  addActiveSection,
-  removeActiveSection,
-} from '../redux/slices/resumeSlice';
+import { fetchResume, updateField, addActiveSection, removeActiveSection } from '../redux/slices/resumeSlice';
 import PersonalDetailsForm from '../components/forms/PersonalDetailsForm';
 import ContactInformationForm from '../components/forms/ContactInformationForm';
 import EmploymentHistoryForm from '../components/forms/EmploymentHistoryForm';
@@ -23,6 +18,8 @@ import WebsiteLinksForm from '../components/forms/additionalSections/WebsiteLink
 import AdditionalSectionSelection from '../components/forms/AdditionalSectionSelection';
 import ResumePreview from '../components/ResumePreview';
 import Sidebar from '../components/common/Sidebar';
+import LanguageForm from '../components/forms/additionalSections/LanguageForm';
+import HobbyForm from '../components/forms/additionalSections/HobbyForm';
 
 const sections = [
   { id: 'personal-details', name: 'Personal Details' },
@@ -33,18 +30,9 @@ const sections = [
   { id: 'professional-summary', name: 'Professional Summary' },
 ];
 
-const allAdditionalSections = [
-  { id: 'courses', name: 'Courses' },
-  { id: 'internships', name: 'Internships' },
-  { id: 'projects', name: 'Projects' },
-  { id: 'references', name: 'References' },
-  { id: 'website-links', name: 'Website Links' },
-];
-
 const ResumeBuilder = () => {
   const { resumeId } = useParams();
   const dispatch = useDispatch();
-  const navigate = useNavigate();
   const token = localStorage.getItem('token');
 
   // Access resume data and status from Redux store
@@ -225,6 +213,14 @@ const ResumeBuilder = () => {
             {...commonProps}
           />
         );
+      case 'languages':
+        return (
+          <LanguageForm
+            data={resumeData.languages}
+            onChange={(field, value) => handleInputChange('languages', value)}
+            {...commonProps}
+          />
+        );
       case 'references':
         return (
           <ReferencesForm
@@ -240,6 +236,15 @@ const ResumeBuilder = () => {
             onChange={(field, value) =>
               handleInputChange('websiteLinks', value)
             }
+            {...commonProps}
+          />
+        );
+
+      case 'hobbies':
+        return (
+          <HobbyForm
+            data={resumeData.hobbies}
+            onChange={(field, value) => handleInputChange('hobbies', value)}
             {...commonProps}
           />
         );
@@ -271,7 +276,6 @@ const ResumeBuilder = () => {
 
         {/* Form Section */}
         <div className="w-4/5 p-6 overflow-y-auto">
-          <h1 className="text-3xl font-bold mb-6">Build Your Resume</h1>
           {renderForm()}
         </div>
       </div>

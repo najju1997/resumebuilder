@@ -65,6 +65,7 @@ export const saveResume = async (resumeData, token) => {
 
 // Fetch a specific resume by ID (for editing purposes)
 export const getResumeById = async (resumeId, token) => {
+  
   try {
     const response = await api.get(`/resume/getresumebyid/${resumeId}`, {
       headers: {
@@ -95,10 +96,15 @@ export const updateResume = async (resumeId, resumeData, token) => {
 };
 
 // AI suggestions for experience points
-export const getAISuggestions = async (resumeId, jobIndex) => {
+export const getAISuggestions = async (resumeId, jobIndex, token) => {
   try {
     console.log('AI resume ID:', resumeId, jobIndex);
-    const response = await api.post(`/resume/ai/suggest/${resumeId}/${jobIndex}`);
+    console.log('token muji', token) 
+    const response = await api.post(`/resume/ai/suggest/${resumeId}/${jobIndex}`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
     return response.data.aiSuggestions;  // Return the AI-generated suggestions
   } catch (error) {
     console.error('Error fetching AI suggestions:', error);
@@ -107,13 +113,32 @@ export const getAISuggestions = async (resumeId, jobIndex) => {
 };
 
 // Function to fetch AI-generated professional summary
-export const generateAISummary = async (resumeId) => {
+export const generateAISummary = async (resumeId, token) => {
   try {
     console.log('AI summary resume ID:', resumeId);
-    const response = await api.post(`/resume/ai/professional-summary/${resumeId}`);
+    const response = await api.post(`/resume/ai/professional-summary/${resumeId}`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
     return response.data.professionalSummary;  // Return the AI-generated professional summary
   } catch (error) {
     console.error('Error generating professional summary:', error);
+    throw error;
+  }
+};
+
+export const getAISkillsSuggestions = async (resumeId, token) => {
+  try {
+    console.log('AI skills front end API resume ID:', resumeId);
+    const response = await api.post(`/resume/ai/suggest-skills/${resumeId}`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    return response.data.suggestedSkills; // Return the suggested skills from the response
+  } catch (error) {
+    console.error('Error fetching AI skills suggestions:', error);
     throw error;
   }
 };

@@ -9,7 +9,7 @@ const ProfessionalSummaryForm = ({ onNext, onPrevious }) => {
   const professionalSummary = useSelector((state) => state.resume.professionalSummary);
   const employmentHistory = useSelector((state) => state.resume.employmentHistory);
   const resumeId = useSelector((state) => state.resume.resumeId);
-
+  const token = localStorage.getItem('token');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
@@ -31,7 +31,7 @@ const ProfessionalSummaryForm = ({ onNext, onPrevious }) => {
     setLoading(true);
     setError(''); // Clear any previous errors
     try {
-      const aiSummary = await generateAISummary(resumeId);
+      const aiSummary = await generateAISummary(resumeId, token);
       dispatch(setProfessionalSummary(aiSummary));  // Update Redux with the AI summary
     } catch (err) {
       setError('AI generation failed.');

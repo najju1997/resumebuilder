@@ -11,8 +11,10 @@ const sectionNames = {
   'courses': 'Courses',
   'internships': 'Internships',
   'projects': 'Projects',
+  'languages': 'Languages',
   'references': 'References',
   'website-links': 'Website Links',
+  'hobbies': 'Hobbies',
 };
 
 const Sidebar = ({ onSelectSection, onDeleteSection, selectedSection }) => {

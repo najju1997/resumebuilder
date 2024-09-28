@@ -1,5 +1,3 @@
-// resumeSlice.js
-
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import { getResumeById, saveResume, updateResume } from '../../api/resumeapi';
 import debounce from 'lodash/debounce';
@@ -21,9 +19,11 @@ export const fetchResume = createAsyncThunk(
 const allAdditionalSections = [
   { id: 'courses', name: 'Courses' },
   { id: 'internships', name: 'Internships' },
+  { id: 'languages', name: 'Languages' },
   { id: 'projects', name: 'Projects' },
   { id: 'references', name: 'References' },
   { id: 'website-links', name: 'Website Links' },
+  { id: 'hobbies', name: 'Hobbies' },
 ];
 
 const initialState = {
@@ -49,8 +49,10 @@ const initialState = {
   internships: [],
   courses: [],
   projects: [],
+  languages: [],
   references: [],
   websiteLinks: [],
+  hobbies: [],
   activeSections: [],
   availableAdditionalSections: allAdditionalSections,
 };
@@ -71,8 +73,10 @@ const convertStateToObject = (state) => {
     internships: [...state.internships],
     courses: [...state.courses],
     projects: [...state.projects],
+    languages: [...state.languages],
     references: [...state.references],
     websiteLinks: [...state.websiteLinks],
+    hobbies: [...state.hobbies],
     activeSections: [...state.activeSections],
     availableAdditionalSections: [...state.availableAdditionalSections],
   });
@@ -225,6 +229,22 @@ const resumeSlice = createSlice({
       const plainState = convertStateToObject(state);
       debouncedSave(plainState);
     },
+    addLanguage(state, action) {
+      state.languages.push(action.payload);
+      const plainState = convertStateToObject(state);
+      debouncedSave(plainState);
+    },
+    updateLanguage(state, action) {
+      const { index, language, proficiency } = action.payload;
+      state.languages[index] = { language, proficiency };
+      const plainState = convertStateToObject(state);
+      debouncedSave(plainState);
+    },
+    removeLanguage(state, action) {
+      state.languages.splice(action.payload, 1);
+      const plainState = convertStateToObject(state);
+      debouncedSave(plainState);
+    },
     addReference(state, action) {
       state.references.push(action.payload);
       const plainState = convertStateToObject(state);
@@ -254,6 +274,22 @@ const resumeSlice = createSlice({
     },
     removeWebsiteLink(state, action) {
       state.websiteLinks.splice(action.payload, 1);
+      const plainState = convertStateToObject(state);
+      debouncedSave(plainState);
+    },
+    addHobby(state, action) {
+      state.hobbies.push(action.payload); // Expecting an object like { hobby: 'Reading' }
+      const plainState = convertStateToObject(state);
+      debouncedSave(plainState);
+    },
+    updateHobby(state, action) {
+      const { index, hobby } = action.payload;
+      state.hobbies[index] = { hobby }; // Update hobby object
+      const plainState = convertStateToObject(state);
+      debouncedSave(plainState);
+    },
+    removeHobby(state, action) {
+      state.hobbies.splice(action.payload, 1);
       const plainState = convertStateToObject(state);
       debouncedSave(plainState);
     },
@@ -336,12 +372,14 @@ export const {
   addProject,
   updateProject,
   removeProject,
+  addLanguage, updateLanguage, removeLanguage,
   addReference,
   updateReference,
   removeReference,
   addWebsiteLink,
   updateWebsiteLink,
   removeWebsiteLink,
+  addHobby, updateHobby, removeHobby,
   resetResume,
   updateField,
   addActiveSection, // Exported new action
